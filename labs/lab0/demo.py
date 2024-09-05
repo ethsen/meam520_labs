@@ -6,6 +6,7 @@ joint positions and gripper.
 
 Try changing the target position to see what the arm does!
 
+Ethan Senatore
 """
 
 import sys
