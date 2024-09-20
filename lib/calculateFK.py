@@ -35,9 +35,9 @@ class FK():
         jointPositions = np.zeros((8,3))
         T0e = np.identity(4)
         a4 = [0, 0, 0, 1]
-        q[3] += np.pi/2
-        q[5] -= np.pi/2
-        q[6] -= np.pi/4
+        q[3] += np.pi
+        q[5] -= np.pi
+        q[6] -= np.pi/2
         for i in range(len(q)):
             angle = q[i]
             a1 = [np.cos(angle), -np.sin(angle)*np.cos(self.angleDisplacement[i]), np.sin(angle)*np.sin(self.angleDisplacement[i]), self.xDisplacement[i]*np.cos(angle)] 
