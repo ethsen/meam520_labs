@@ -35,9 +35,9 @@ class FK():
         jointPositions = np.zeros((8,3))
         T0e = np.identity(4)
         a4 = [0, 0, 0, 1]
-        q[3] += np.pi
-        q[5] -= np.pi
-        q[6] -= np.pi/2
+        q[3] += np.pi/2
+        q[5] -= np.pi/2
+        q[6] -= np.pi/4
         for i in range(len(q)):
             angle = q[i]
             a1 = [np.cos(angle), -np.sin(angle)*np.cos(self.angleDisplacement[i]), np.sin(angle)*np.sin(self.angleDisplacement[i]), self.xDisplacement[i]*np.cos(angle)] 
@@ -94,6 +94,6 @@ if __name__ == "__main__":
     q = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
 
     joint_positions, T0e = fk.forward(q)
-    
+    print(T0e)
     #print("Joint Positions:\n",joint_positions)
     #print("End Effector Pose:\n",T0e)
