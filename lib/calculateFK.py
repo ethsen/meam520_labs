@@ -54,7 +54,7 @@ class FK():
     
         # Your code ends here
         #print("Joint Positions:\n",jointPositions)
-        #jointPositions += self.jointOffsets
+        jointPositions += self.jointOffsets
         #print("Joint Positions:\n",jointPositions)
         return jointPositions, T0e
 
