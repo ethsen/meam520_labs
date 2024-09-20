@@ -47,7 +47,7 @@ class FK():
             A = np.stack((a1,a2,a3,a4), axis = 0)
             T0e = np.matmul(T0e,A)
             jointPositions[i+1] = T0e[:3,3]
-            self.jointOffsets[i+1] = np.matmul(T0e[:3,:3], self.jointOffsets[i+1,:])
+            self.jointOffsets[i+1] = np.matmul(self.jointOffsets[i+1,:],T0e[:3,:3])
     
         # Your code ends here
         #print("Joint Positions:\n",jointPositions)
