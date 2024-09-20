@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from math import pi
 
 class FK():
@@ -14,7 +15,7 @@ class FK():
         self.angleDisplacement = [-np.pi/2,np.pi/2,np.pi/2,np.pi/2,-np.pi/2,np.pi/2,0]
         self.jointOffsets = np.stack(([0,0,.141], [0,0,0], [0,0,.195],
                                       [0,0,0],[.125,0,0],[0,.015,0],
-                                      [0,0,-.051],[0,0,0]),axis= 0)
+                                      [0,0,.051],[0,0,0]),axis= 0)
 
     def forward(self, q):
         """
@@ -45,9 +46,11 @@ class FK():
             a3 = [0, np.sin(self.angleDisplacement[i]), np.cos(self.angleDisplacement[i]), self.zDisplacement[i]] 
             A = np.stack((a1,a2,a3,a4), axis = 0)
             T0e = np.matmul(T0e,A)
-            #print(A)
+            if i ==1:
+                print(A)
             #print(i)
             jointPositions[i+1] = T0e[:3,3]
+            self.jointOffsets[i+1] = np.matmul(T0e[:3,:3], self.jointOffsets[i+1,:])
     
         # Your code ends here
         #print("Joint Positions:\n",jointPositions)
@@ -57,6 +60,17 @@ class FK():
 
     # feel free to define additional helper methods to modularize your solution for lab 1
 
+    def testPlot(self,jointPositions):
+        ax = plt.figure().add_subplot(projection='3d')
+        ax.plot(jointPositions[:,0], jointPositions[:,1], jointPositions[:,2])
+        ax.scatter(jointPositions[:,0], jointPositions[:,1], jointPositions[:,2], c= 'red')
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Z')
+        ax.set_xlim(-1, 1)
+        ax.set_ylim(-1, 1)
+        ax.set_zlim(0, 2)
+        plt.show()
     
     # This code is for Lab 2, you can ignore it ofr Lab 1
     def get_axis_of_rotation(self, q):
@@ -94,6 +108,6 @@ if __name__ == "__main__":
     q = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
 
     joint_positions, T0e = fk.forward(q)
-    print(T0e)
+    #fk.testPlot(joint_positions)
     #print("Joint Positions:\n",joint_positions)
     #print("End Effector Pose:\n",T0e)
