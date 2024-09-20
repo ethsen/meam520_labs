@@ -50,12 +50,12 @@ class FK():
                 print(A)
             #print(i)
             jointPositions[i+1] = T0e[:3,3]
-            self.jointOffsets[i+1] = np.matmul(T0e[:3,:3], self.jointOffsets[i+1,:])
+            #self.jointOffsets[i+1] = np.matmul(T0e[:3,:3], self.jointOffsets[i+1,:])
     
         # Your code ends here
         #print("Joint Positions:\n",jointPositions)
-        jointPositions += self.jointOffsets
-        print("Joint Positions:\n",jointPositions)
+        #jointPositions += self.jointOffsets
+        #print("Joint Positions:\n",jointPositions)
         return jointPositions, T0e
 
     # feel free to define additional helper methods to modularize your solution for lab 1
@@ -105,9 +105,12 @@ if __name__ == "__main__":
     fk = FK()
 
     # matches figure in the handout
-    q = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
+    for i in range(1,15):
+        q = np.array([0,0,np.pi/2,-pi/4,np.pi/2,pi,pi/4])
 
-    joint_positions, T0e = fk.forward(q)
+        joint_positions, T0e = fk.forward(q)
+        print(joint_positions)
+        print(i)
     fk.testPlot(joint_positions)
     #print("Joint Positions:\n",joint_positions)
     #print("End Effector Pose:\n",T0e)
