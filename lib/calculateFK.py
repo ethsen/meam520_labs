@@ -9,7 +9,13 @@ class FK():
         # useful in computing the forward kinematics. The data you will need
         # is provided in the lab handout
 
-        pass
+        self.xDisplacement =[0,0,0,0,0,0,0.088]
+        self.zDisplacement = [.333,0,.316,0,.4665,0,.121]
+        self.angleDisplacement = [-np.pi/2,np.pi/2,-np.pi/2,-np.pi/2
+                                  ,-np.pi/2,-np.pi/2,0]
+        self.jointOffsets = np.stack(([0,0,.141], [0,0,0], [0,0,.195],
+                                      [0.0825,0,0],[.125+.0825,0,0.0825],[0,.015,.0825],
+                                      [0.088,0,0.0315],[0,0,0]),axis= 0)
 
     def forward(self, q):
         """
@@ -29,9 +35,26 @@ class FK():
 
         jointPositions = np.zeros((8,3))
         T0e = np.identity(4)
-
+        a4 = [0, 0, 0, 1]
+        q[3] -= np.pi/2
+        q[5] += np.pi/2
+        q[6] -= np.pi/4
+        for i in range(len(q)):
+            angle = q[i]
+            a1 = [np.cos(angle), -np.sin(angle)*np.cos(self.angleDisplacement[i]), np.sin(angle)*np.sin(self.angleDisplacement[i]), self.xDisplacement[i]*np.cos(angle)] 
+            a2 = [np.sin(angle), np.cos(angle)*np.cos(self.angleDisplacement[i]), -np.cos(angle)*np.sin(self.angleDisplacement[i]), self.xDisplacement[i]*np.sin(angle)] 
+            a3 = [0, np.sin(self.angleDisplacement[i]), np.cos(self.angleDisplacement[i]), self.zDisplacement[i]] 
+            A = np.stack((a1,a2,a3,a4), axis = 0)
+            T0e = np.matmul(T0e,A)
+            print(A)
+            print(T0e)
+            print(i)
+            jointPositions[i+1] = T0e[:3,3]
+    
         # Your code ends here
-
+        #print("Joint Positions:\n",jointPositions)
+        jointPositions += self.jointOffsets
+        #print("Joint Positions:\n",jointPositions)
         return jointPositions, T0e
 
     # feel free to define additional helper methods to modularize your solution for lab 1
@@ -74,5 +97,5 @@ if __name__ == "__main__":
 
     joint_positions, T0e = fk.forward(q)
     
-    print("Joint Positions:\n",joint_positions)
-    print("End Effector Pose:\n",T0e)
+    #print("Joint Positions:\n",joint_positions)
+    #print("End Effector Pose:\n",T0e)
