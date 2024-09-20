@@ -46,9 +46,6 @@ class FK():
             a3 = [0, np.sin(self.angleDisplacement[i]), np.cos(self.angleDisplacement[i]), self.zDisplacement[i]] 
             A = np.stack((a1,a2,a3,a4), axis = 0)
             T0e = np.matmul(T0e,A)
-            if i ==1:
-                print(A)
-            #print(i)
             jointPositions[i+1] = T0e[:3,3]
             self.jointOffsets[i+1] = np.matmul(T0e[:3,:3], self.jointOffsets[i+1,:])
     
