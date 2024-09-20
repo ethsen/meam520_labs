@@ -13,9 +13,9 @@ class FK():
         self.xDisplacement =[0,0,0.0825,0.0825,0,0.088,0]
         self.zDisplacement = [0.192+0.141,0,0.195+0.121,0,0.125+0.259,0,0.051+0.159]
         self.angleDisplacement = [-np.pi/2,np.pi/2,np.pi/2,np.pi/2,-np.pi/2,np.pi/2,0]
-        self.jointOffsets = np.stack(([0,0,.141], [0,0,0], [0,0,.195],
-                                      [0,0,0],[0.125,0,0],[0,0.015,0],
-                                      [0,0,-.051],[0,0,0]),axis= 0)
+        self.jointOffsets = np.stack(([0,0,.141,1], [0,0,0,1], [0,0,.195,1],
+                                      [0,0,0,1],[0,0,0.125,1],[0,-0.015,0,1],
+                                      [0,0,.051,1],[0,0,0,1]),axis= 0)
 
     def forward(self, q):
         """
@@ -34,6 +34,7 @@ class FK():
         # Your Lab 1 code starts here
 
         jointPositions = np.zeros((8,3))
+        jointPositions[0,:] = [0,0,.141]
         T0e = np.identity(4)
         a4 = [0, 0, 0, 1]
         q[3] += np.pi
@@ -46,12 +47,13 @@ class FK():
             a3 = [0, np.sin(self.angleDisplacement[i]), np.cos(self.angleDisplacement[i]), self.zDisplacement[i]] 
             A = np.stack((a1,a2,a3,a4), axis = 0)
             T0e = np.matmul(T0e,A)
-            jointPositions[i+1] = T0e[:3,3]
-            self.jointOffsets[i+1] = np.matmul(self.jointOffsets[i+1,:],T0e[:3,:3])
+            #jointPositions[i+1] = T0e[:3,3]
+            jointPositions[i+1] = np.matmul(T0e,self.jointOffsets[i+1,:].reshape(-1,1))[:3,0]
+            #self.jointOffsets[i+1] = np.matmul(T0e[:3,:3], self.jointOffsets[i+1,:])
     
         # Your code ends here
         #print("Joint Positions:\n",jointPositions)
-        jointPositions += self.jointOffsets
+        #jointPositions += self.jointOffsets
         #print("Joint Positions:\n",jointPositions)
         return jointPositions, T0e
 
@@ -106,8 +108,6 @@ if __name__ == "__main__":
         q = np.array([0,0,np.pi/2,-pi/4,np.pi/2,pi,pi/4])
 
         joint_positions, T0e = fk.forward(q)
-        print(joint_positions)
-        print(i)
     fk.testPlot(joint_positions)
     #print("Joint Positions:\n",joint_positions)
     #print("End Effector Pose:\n",T0e)
