@@ -14,8 +14,8 @@ class FK():
         self.zDisplacement = [0.192+0.141,0,0.195+0.121,0,0.125+0.259,0,0.051+0.159]
         self.angleDisplacement = [-np.pi/2,np.pi/2,np.pi/2,np.pi/2,-np.pi/2,np.pi/2,0]
         self.jointOffsets = np.stack(([0,0,.141], [0,0,0], [0,0,.195],
-                                      [0,0,0],[0,0,0.125],[0,0,-0.015],
-                                      [0,0,.051],[0,0,0]),axis= 0)
+                                      [0,0,0],[0.125,0,0],[0,0.015,0],
+                                      [0,0,-.051],[0,0,0]),axis= 0)
 
     def forward(self, q):
         """
@@ -50,7 +50,7 @@ class FK():
                 print(A)
             #print(i)
             jointPositions[i+1] = T0e[:3,3]
-            #self.jointOffsets[i+1] = np.matmul(T0e[:3,:3], self.jointOffsets[i+1,:])
+            self.jointOffsets[i+1] = np.matmul(T0e[:3,:3], self.jointOffsets[i+1,:])
     
         # Your code ends here
         #print("Joint Positions:\n",jointPositions)
