@@ -47,7 +47,6 @@ class FK():
         for i in range(len(q)):
             angle = q[i]
             a1 = [np.cos(angle), -np.sin(angle)*np.cos(self.angleDisplacement[i]), np.sin(angle)*np.sin(self.angleDisplacement[i]), self.xDisplacement[i]*np.cos(angle)] 
-
             a2 = [np.sin(angle), np.cos(angle)*np.cos(self.angleDisplacement[i]), -np.cos(angle)*np.sin(self.angleDisplacement[i]), self.xDisplacement[i]*np.sin(angle)] 
             a3 = [0, np.sin(self.angleDisplacement[i]), np.cos(self.angleDisplacement[i]), self.zDisplacement[i]] 
             A = np.stack((a1,a2,a3,a4), axis = 0)
@@ -55,8 +54,6 @@ class FK():
             #jointPositions[i+1] = T0e[:3,3]
             jointPositions[i+1] = np.matmul(T0e,self.jointOffsets[i+1,:].reshape(-1,1))[:3,0]
             #self.jointOffsets[i+1] = np.matmul(T0e[:3,:3], self.jointOffsets[i+1,:])
-            
-        print(T0e)
         # Your code ends here
         #print("Joint Positions:\n",jointPositions)
         #jointPositions += self.jointOffsets
