@@ -18,7 +18,7 @@ class FK():
                                       [0,0,.051,1],[0,0,0,1]),axis= 0)
         """
         self.xDisplacement =[0,0,0.0825,-0.0825,0,0.088,0]
-        self.zDisplacement = [0.192+0.141,0,0.195+0.121,0,0.125+0.259+0.0825,0,0.051+0.159]
+        self.zDisplacement = [0.192+0.141,0,0.195+0.121,0,0.259+.125,0,0.051+0.159]
         self.angleDisplacement = [-pi/2,pi/2,pi/2,-pi/2,pi/2,pi/2,0]
         self.jointOffsets = np.stack(([0,0,.141,1], [0,0,0,1], [0,0,.195,1],
                                       [0,0,0,1],[0,0,0.125+.0825,1],[0,0,-.015,1],
@@ -111,8 +111,8 @@ if __name__ == "__main__":
 
     # matches figure in the handout
     
-    #q = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
-    q = np.array([0,0,0,0,0,0,0])
+    q = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
+    #q = np.array([0,0,0,0,0,0,0])
     joint_positions, T0e = fk.forward(q)
     fk.testPlot(joint_positions)
     print(joint_positions)
