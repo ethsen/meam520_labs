@@ -43,7 +43,7 @@ class FK():
             T0e = np.matmul(T0e,A)
             jointPositions[i+1] = np.matmul(T0e,self.jointOffsets[i+1,:].reshape(-1,1))[:3,0]
 
-        return jointPositions, T0e
+        return np.round(jointPositions,decimals =6), T0e
 
     # feel free to define additional helper methods to modularize your solution for lab 1
 
