@@ -41,7 +41,7 @@ class FK():
             a3 = [0, np.sin(self.angleDisplacement[i]), np.cos(self.angleDisplacement[i]), self.zDisplacement[i]] 
             A = np.stack((a1,a2,a3,a4), axis = 0)
             T0e = T0e @ A
-            jointPositions[i+1] = T0e @ self.jointOffsets[i+1,:].reshape(-1,1)[:3,0]
+            jointPositions[i+1] = (T0e @ self.jointOffsets[i+1,:].reshape(-1,1))[:3,0]
 
         return np.round(jointPositions,decimals =6), T0e
 
