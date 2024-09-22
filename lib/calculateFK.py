@@ -10,8 +10,8 @@ class FK():
         # useful in computing the forward kinematics. The data you will need
         # is provided in the lab handout
         self.xDisplacement =[0,0,0.0825,-0.0825,0,0.088,0]
-        self.zDisplacement = [0.192+0.141,0,0.195+0.121,0,0.259+.125,0,0.051+0.159]
-        self.angleDisplacement = [-pi/2,pi/2,pi/2,-pi/2,pi/2,pi/2,0]
+        self.zDisplacement = [0.333,0,0.316,0,0.379,0,0.210]
+        self.angleDisplacement = [-np.pi/2,np.pi/2,np.pi/2,-np.pi/2,np.pi/2,np.pi/2,0]
         self.jointOffsets = np.stack(([0,0,.141,1], [0,0,0,1], [0,0,.195,1],
                                       [0,0,0,1],[0,0,0.125,1],[0,0,-.015,1],
                                       [0,0,.051,1],[0,0,0,1]),axis= 0)
@@ -30,19 +30,26 @@ class FK():
         """
 
         jointPositions = np.zeros((8,3))
-        jointPositions[0,:] = [0,0,.141]
+        jointPositions[0,:] = [0,0,0.141]
         T0e = np.identity(4)
         a4 = [0, 0, 0, 1]
-        q[-1] -= pi/4
+        
         for i in range(len(q)):
             angle = q[i]
+            if i ==6:
+                angle -= pi/4
+            
             a1 = [np.cos(angle), -np.sin(angle)*np.cos(self.angleDisplacement[i]), np.sin(angle)*np.sin(self.angleDisplacement[i]), self.xDisplacement[i]*np.cos(angle)] 
             a2 = [np.sin(angle), np.cos(angle)*np.cos(self.angleDisplacement[i]), -np.cos(angle)*np.sin(self.angleDisplacement[i]), self.xDisplacement[i]*np.sin(angle)] 
             a3 = [0, np.sin(self.angleDisplacement[i]), np.cos(self.angleDisplacement[i]), self.zDisplacement[i]] 
-            A = np.stack((a1,a2,a3,a4), axis = 0)
-            T0e = np.matmul(T0e,A)
-            jointPositions[i+1] = np.matmul(T0e,self.jointOffsets[i+1,:].reshape(-1,1))[:3,0]
+            # = np.stack((a1,a2,a3,a4), axis = 0)
+            A = np.array([a1,a2,a3,a4])
+            T0e = T0e @ A
 
+            #jointPositions[i+1,:] = np.matmul(T0e,self.jointOffsets[i+1,:].reshape(-1,1))[:3,0]
+            jointPositions[i+1,:] = (T0e @ self.jointOffsets[i+1,:])[:3]
+
+        jointPositions = np.round(jointPositions, decimals=6)
         return jointPositions, T0e
 
     # feel free to define additional helper methods to modularize your solution for lab 1
