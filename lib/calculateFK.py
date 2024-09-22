@@ -10,7 +10,7 @@ class FK():
         # useful in computing the forward kinematics. The data you will need
         # is provided in the lab handout
         self.xDisplacement =[0,0,0.0825,-0.0825,0,0.088,0]
-        self.zDisplacement = [0.192+0.141,0,0.195+0.121,0,0.259+.125,0,0.051+0.159]
+        self.zDisplacement = [0.192+0.141,0,0.195+0.121,0,.379,0,0.051+0.159]
         self.angleDisplacement = [-pi/2,pi/2,pi/2,-pi/2,pi/2,pi/2,0]
         self.jointOffsets = np.stack(([0,0,.141,1], [0,0,0,1], [0,0,.195,1],
                                       [0,0,0,1],[0,0,0.125,1],[0,0,-.015,1],
