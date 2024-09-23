@@ -31,7 +31,7 @@ class FK():
 
         jointPositions = np.zeros((8,3))
         jointPositions[0,:] = [0,0,.141]
-        T0ecurr = np.identity(4)
+        T0e = np.identity(4)
         a4 = [0, 0, 0, 1]
         
         for i in range(len(q)):
@@ -42,11 +42,9 @@ class FK():
             a1 = [np.cos(angle), -np.sin(angle)*np.cos(self.angleDisplacement[i]), np.sin(angle)*np.sin(self.angleDisplacement[i]), self.xDisplacement[i]*np.cos(angle)] 
             a2 = [np.sin(angle), np.cos(angle)*np.cos(self.angleDisplacement[i]), -np.cos(angle)*np.sin(self.angleDisplacement[i]), self.xDisplacement[i]*np.sin(angle)] 
             a3 = [0, np.sin(self.angleDisplacement[i]), np.cos(self.angleDisplacement[i]), self.zDisplacement[i]] 
-            A = np.stack((a1,a2,a3,a4), axis = 0)
-            T0e = T0ecurr @ A
-            T0ecurr = T0e
-            jointPositions[i+1,:] = (T0e @ self.jointOffsets[i+1,:].reshape(-1,1))[:3,0]
-
+            A = np.array([a1,a2,a3,a4])
+            T0e = T0e @ A
+            jointPositions[i+1,:] = (T0e @ self.jointOffsets[i+1,:])[:3]
         return np.round(jointPositions,decimals =6), T0e
 
     # feel free to define additional helper methods to modularize your solution for lab 1
@@ -100,7 +98,8 @@ if __name__ == "__main__":
     q = np.array([0,0,0,0,0,0,0])
     #q = np.array([0,0,0,0,0,0,0])
     joint_positions, T0e = fk.forward(q)
-    fk.testPlot(joint_positions)
+    #fk.testPlot(joint_positions)
+    print(T0e)
     #print(joint_positions)
     #print("Joint Positions:\n",joint_positions)
     #print("End Effector Pose:\n",T0e)
