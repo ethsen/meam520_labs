@@ -14,6 +14,4 @@ def FK_velocity(q_in, dq):
 
     velo = j @ dq
     #velocity = np.zeros((6, 1))
-
-
     return velo

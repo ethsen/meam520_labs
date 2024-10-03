@@ -1,5 +1,5 @@
 import numpy as np
-from lib.calculateFK import FK
+from calculateFK import FK
 
 def calcJacobian(q_in):
     """
@@ -14,13 +14,14 @@ def calcJacobian(q_in):
     jw = fk.get_axis_of_rotation(q_in)
     aiCollection = fk.compute_Ai(q_in)
     jv = []
-    for ai in aiCollection:
-        lastCol = ai[:3,3]
-        jv.append(lastCol)
-
+    for i in range(len(aiCollection)):
+        if i == 0:
+            originDiff = aiCollection[-1][:3,-1]
+        else:
+            originDiff = aiCollection[-1][:3,-1] - aiCollection[i-1][:3,-1]
+        jv.append(np.cross(jw[i],originDiff))
+        
     jv = np.array(jv)
-
-
 
     J[0:3, :] = jv.T
     J[3:6, :] = jw.T  # Angular velocities in the last three rows
@@ -28,5 +29,6 @@ def calcJacobian(q_in):
     return J
 
 if __name__ == '__main__':
-    q= np.array([0, 0, 0, -np.pi/2, 0, np.pi/2, np.pi/4])
-    print(np.round(calcJacobian(q),3))
+    #q= np.array([0, 0, 0, -np.pi/2, 0, np.pi/2, np.pi/4])
+    q= np.array([0, 0, 0, 0, 0, 0, 0])
+   #print(np.round(calcJacobian(q),3))

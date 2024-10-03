@@ -102,6 +102,7 @@ class FK():
         """
         a4 = [0, 0, 0, 1]
         transformationList = []
+        A = np.identity(4)
         for i in range(len(q)):
             angle = q[i]
             if i ==6:
@@ -109,7 +110,7 @@ class FK():
             a1 = [np.cos(angle), -np.sin(angle)*np.cos(self.angleDisplacement[i]), np.sin(angle)*np.sin(self.angleDisplacement[i]), self.xDisplacement[i]*np.cos(angle)] 
             a2 = [np.sin(angle), np.cos(angle)*np.cos(self.angleDisplacement[i]), -np.cos(angle)*np.sin(self.angleDisplacement[i]), self.xDisplacement[i]*np.sin(angle)] 
             a3 = [0, np.sin(self.angleDisplacement[i]), np.cos(self.angleDisplacement[i]), self.zDisplacement[i]] 
-            A = np.array([a1,a2,a3,a4])
+            A = A @ np.array([a1,a2,a3,a4])
             transformationList.append(A)
         
         return np.array(transformationList)
@@ -122,9 +123,10 @@ if __name__ == "__main__":
     
     q = np.array([0,0,0,0,0,0,0])
     #q = np.array([0,0,0,0,0,0,0])
-    #joint_positions, T0e = fk.forward(q)
+    joint_positions, T0e = fk.forward(q)
     #fk.testPlot(joint_positions)
-    print(fk.get_axis_of_rotation(q))
-    #print(joint_positions)
+    #print(fk.get_axis_of_rotation(q))
+    #print(fk.compute_Ai(q))
+    print(joint_positions)
     #print("Joint Positions:\n",joint_positions)
     #print("End Effector Pose:\n",T0e)
