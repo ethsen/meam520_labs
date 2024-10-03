@@ -25,7 +25,7 @@ def IK_velocity(q_in, v_in, omega_in):
 
      j = calcJacobian(q_in)
      xi = np.vstack((v_in, omega_in))
-     pinvJ = np.linalg.pin(j)
+     pinvJ = np.linalg.pinv(j)
      """
      augJ = np.hstack(j, xi)
      if np.linalg.matrix_rank(j) == np.linalg.matrix_rank(augJ):
