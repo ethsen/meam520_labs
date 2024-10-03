@@ -9,10 +9,21 @@ def calcJacobian(q_in):
     rows correspond to the linear velocity and the last three rows correspond to
     the angular velocity, expressed in world frame coordinates
     """
-
+    fk = FK()
     J = np.zeros((6, 7))
+    jw = fk.get_axis_of_rotation(q_in)
+    aiCollection = fk.compute_Ai(q_in)
+    jv = []
+    for ai in aiCollection:
+        lastCol = ai[:3,3]
+        jv.append(lastCol)
 
-    ## STUDENT CODE GOES HERE
+    jv = np.array(jv)
+
+
+
+    J[0:3, :] = jv.T
+    J[3:6, :] = jw.T  # Angular velocities in the last three rows
 
     return J
 

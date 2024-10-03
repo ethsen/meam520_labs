@@ -73,8 +73,23 @@ class FK():
 
         """
         # STUDENT CODE HERE: This is a function needed by lab 2
+        T0e = np.identity(4)
+        a4 = [0, 0, 0, 1]
+        self.axisOfRot = [np.array([0,0,1])]
 
-        return()
+        for i in range(len(q)-1):
+            angle = q[i]
+            if i ==6:
+                angle -= pi/4
+            
+            a1 = [np.cos(angle), -np.sin(angle)*np.cos(self.angleDisplacement[i]), np.sin(angle)*np.sin(self.angleDisplacement[i]), self.xDisplacement[i]*np.cos(angle)] 
+            a2 = [np.sin(angle), np.cos(angle)*np.cos(self.angleDisplacement[i]), -np.cos(angle)*np.sin(self.angleDisplacement[i]), self.xDisplacement[i]*np.sin(angle)] 
+            a3 = [0, np.sin(self.angleDisplacement[i]), np.cos(self.angleDisplacement[i]), self.zDisplacement[i]] 
+            A = np.array([a1,a2,a3,a4])
+            T0e = T0e @ A
+            self.axisOfRot += [T0e[:3,2]]
+
+        return np.array(self.axisOfRot)
     
     def compute_Ai(self, q):
         """
@@ -85,9 +100,19 @@ class FK():
         Ai: - 4x4 list of np array of homogenous transformations describing the FK of the robot. Transformations are not
               necessarily located at the joint locations
         """
-        # STUDENT CODE HERE: This is a function needed by lab 2
-
-        return()
+        a4 = [0, 0, 0, 1]
+        transformationList = []
+        for i in range(len(q)):
+            angle = q[i]
+            if i ==6:
+                angle -= pi/4
+            a1 = [np.cos(angle), -np.sin(angle)*np.cos(self.angleDisplacement[i]), np.sin(angle)*np.sin(self.angleDisplacement[i]), self.xDisplacement[i]*np.cos(angle)] 
+            a2 = [np.sin(angle), np.cos(angle)*np.cos(self.angleDisplacement[i]), -np.cos(angle)*np.sin(self.angleDisplacement[i]), self.xDisplacement[i]*np.sin(angle)] 
+            a3 = [0, np.sin(self.angleDisplacement[i]), np.cos(self.angleDisplacement[i]), self.zDisplacement[i]] 
+            A = np.array([a1,a2,a3,a4])
+            transformationList.append(A)
+        
+        return np.array(transformationList)
     
 if __name__ == "__main__":
 
@@ -97,9 +122,9 @@ if __name__ == "__main__":
     
     q = np.array([0,0,0,0,0,0,0])
     #q = np.array([0,0,0,0,0,0,0])
-    joint_positions, T0e = fk.forward(q)
+    #joint_positions, T0e = fk.forward(q)
     #fk.testPlot(joint_positions)
-    print(T0e)
+    print(fk.get_axis_of_rotation(q))
     #print(joint_positions)
     #print("Joint Positions:\n",joint_positions)
     #print("End Effector Pose:\n",T0e)
