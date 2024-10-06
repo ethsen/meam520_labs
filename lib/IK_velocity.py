@@ -23,20 +23,29 @@ def IK_velocity(q_in, v_in, omega_in):
      v_in = v_in.reshape((3,1))
      omega_in = omega_in.reshape((3,1))
 
-     j = calcJacobian(q_in)
+     j = np.round(calcJacobian(q_in),3)
      xi = np.vstack((v_in, omega_in))
      pinvJ = np.linalg.pinv(j)
-     """
-     augJ = np.hstack(j, xi)
-     if np.linalg.matrix_rank(j) == np.linalg.matrix_rank(augJ):
-          pinvJ = np.linalg.pin(j)
-          dq = np.linalg.lstsq(pinvJ, xi)
-          print("infinitely many solutions")
-     else:
-          print("no solutions")
-     """
-          
-     #dq = np.zeros((1, 7))
-     dq = np.linalg.lstsq(pinvJ, xi)
      
-     return dq
+     augJ = np.hstack([j, xi])
+     
+     if np.linalg.matrix_rank(j) == np.linalg.matrix_rank(augJ):
+          return pinvJ @ xi
+     else:
+          dqMinNorm, residuals, rank, s = np.linalg.lstsq(j, xi, rcond=None)
+          b = np.zeros((j.shape[1], 1))  # Placeholder for null space vector
+          I = np.eye(j.shape[1])
+
+          dq_null_space = (I - np.linalg.pinv(j) @ j) @ b
+          dq = dqMinNorm + dq_null_space
+          return dq.flatten()
+
+     
+     
+
+if __name__ == '__main__':
+    #q= np.array([0, 0, 0, -np.pi/2, 0, np.pi/2, np.pi/4])
+    q_in= np.array([0, 0, 0, 0, 0, 0, 0])
+    v_in = np.array([np.nan,0,0.088])
+    omega_in = np.array([0,0,1])
+    print(IK_velocity(q_in,v_in,omega_in))

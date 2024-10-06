@@ -31,6 +31,40 @@ def angularJacobian(q):
     return
 
 def linearJacobian(q):
+    T0e= calcT0e(q)
+    prev = sp.eye(4)
+    for i in range(len(q)):
+        if i  == 0:
+            currTheta = 'theta_' + str(i+1)
+            theta = sp.symbols(currTheta)
+            a1 = [sp.cos(theta), -sp.sin(theta) * int(sp.cos(angleDisplacement[i])), sp.sin(theta) * int(sp.sin(angleDisplacement[i])), xDisplacement[i]*sp.cos(theta)]
+            a2 = [sp.sin(theta), sp.cos(theta) * int(sp.cos(angleDisplacement[i])), -sp.cos(theta) * int(sp.sin(angleDisplacement[i])), xDisplacement[i]*sp.sin(theta)]
+            a3 = [0, int(sp.sin(angleDisplacement[i])), int(sp.cos(angleDisplacement[i])),zDisplacement[i]]
+            a4 = [0,0,0,1]
+            ai = sp.Matrix([a1,a2,a3,a4])
+            zi = sp.Matrix([[0],[0],[1]])
+            jvi = zi.cross(T0e[:3,-1] - jointOffsets[i])
+            prev = ai
+
+        else:
+            currTheta = 'theta_' + str(i+1)
+            theta = sp.symbols(currTheta)
+            a1 = [sp.cos(theta), -sp.sin(theta) * int(sp.cos(angleDisplacement[i])), sp.sin(theta) * int(sp.sin(angleDisplacement[i])), xDisplacement[i]*sp.cos(theta)]
+            a2 = [sp.sin(theta), sp.cos(theta) * int(sp.cos(angleDisplacement[i])), -sp.cos(theta) * int(sp.sin(angleDisplacement[i])), xDisplacement[i]*sp.sin(theta)]
+            a3 = [0, int(sp.sin(angleDisplacement[i])), int(sp.cos(angleDisplacement[i])),zDisplacement[i]]
+            a4 = [0,0,0,1]
+            ai = sp.Matrix([a1,a2,a3,a4])
+            zi = prev[:3,2]
+            jvi = zi.cross((T0e[:3,-1] - (ai[:3,-1] + jointOffsets[i])))
+            prev = ai
+
+
+        print(f"Translation matrix for joint {i}:")
+        sp.pprint(jvi)
+        print("\n")
+
+
+def calcT0e(q):
     T0e= sp.eye(4)
     for i in range(len(q)):
         currTheta = 'theta_' + str(i+1)
@@ -39,15 +73,14 @@ def linearJacobian(q):
         a2 = [sp.sin(theta), sp.cos(theta) * int(sp.cos(angleDisplacement[i])), -sp.cos(theta) * int(sp.sin(angleDisplacement[i])), xDisplacement[i]*sp.sin(theta)]
         a3 = [0, int(sp.sin(angleDisplacement[i])), int(sp.cos(angleDisplacement[i])),zDisplacement[i]]
         a4 = [0,0,0,1]
-        T0e = T0e * sp.Matrix([a1, a2, a3,a4])
+        ai = sp.Matrix([a1,a2,a3,a4])
+        T0e = T0e * ai
 
-        print(f"Translation matrix for joint {i}:")
-        sp.pprint(T0e[:3,-1])
-        print("\n")
-
+    return T0e
 
 
 if __name__ == "__main__":
+
     q = np.array([0, 0, 0, 0, 0, 0, 0])
     #angularJacobian(q)
     linearJacobian(q)
