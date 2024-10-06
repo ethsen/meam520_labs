@@ -26,6 +26,8 @@ def IK_velocity(q_in, v_in, omega_in):
      j = np.round(calcJacobian(q_in),3)
      xi = np.vstack((v_in, omega_in))
      pinvJ = np.linalg.pinv(j)
+     augJ = np.hstack(j, xi)
+
      
      augJ = np.hstack([j, xi])
      
