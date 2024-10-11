@@ -107,8 +107,8 @@ class JacobianDemo():
         x0 = np.array([0.307, 0, 0.487]) # corresponds to neutral position
 
         ## STUDENT CODE GOES HERE
-        xdes = x0 + np.array([0,ry*np.cos(f*t), rz* np.sin(f*t)])
-        vdes = np.array([0, -ry*f*np.sin(f*t), rz*f*np.cos(f*t)])
+        xdes = x0 + np.array([0,ry*cos(f*t), rz* sin(f*t)])
+        vdes = np.array([0, -ry*f*sin(f*t), rz*f*cos(f*t)])
 
         Rdes = np.diag([1., -1., -1.])
         ang_vdes = 0.0 * np.array([1.0, 0.0, 0.0])
@@ -134,8 +134,8 @@ class JacobianDemo():
         ## STUDENT CODE GOES HERE
         x0 = np.array([0.307,0,0.487]) #corresponds to neutral position
         # TODO: replace these!
-        xdes = x0 + np.array([0, 0, L * np.sin(f * t)])        
-        vdes = np.array([0, 0, L * f * np.cos(f * t)])
+        xdes = x0 + np.array([0, 0, L * sin(f * t)])        
+        vdes = np.array([0, 0, L * f * cos(f * t)])
 
         # Example for generating an orientation trajectory
         # The end effector will rotate around the x-axis during the line motion
