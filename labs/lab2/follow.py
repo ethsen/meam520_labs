@@ -135,8 +135,8 @@ class JacobianDemo():
         ## STUDENT CODE GOES HERE
         x0 = np.array([0.307,0,0.487]) #corresponds to neutral position
         # TODO: replace these!
-        xdes = x0 + np.array([L,L,0])
-        vdes = np.array([f,f,0])
+        xdes = x0 + np.array([L,0,0])
+        vdes = np.array([f,0,0])
         # Example for generating an orientation trajectory
         # The end effector will rotate around the x-axis during the line motion
         # following the changing ang
