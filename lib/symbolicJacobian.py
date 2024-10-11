@@ -15,16 +15,12 @@ def angularJacobian(q):
     for i in range(len(q)):
         currTheta = 'theta_' + str(i+1)
         theta = sp.symbols(currTheta)
-        
-        # Define rotation matrix rows
         r1 = [sp.cos(theta), -sp.sin(theta) * int(sp.cos(angleDisplacement[i])), sp.sin(theta) * int(sp.sin(angleDisplacement[i]))]
         r2 = [sp.sin(theta), sp.cos(theta) * int(sp.cos(angleDisplacement[i])), -sp.cos(theta) * int(sp.sin(angleDisplacement[i]))]
         r3 = [0, int(sp.sin(angleDisplacement[i])), int(sp.cos(angleDisplacement[i]))]
         
-        # Create a rotation matrix from the rows
-        rot = rot * sp.Matrix([r1, r2, r3])  # Pass the rows as a list of lists
+        rot = rot * sp.Matrix([r1, r2, r3])  
         
-        # Print the symbolic rotation matrix
         print(f"Rotation matrix for link {i}:")
         sp.pprint(rot[:,-1])
         print("\n")
