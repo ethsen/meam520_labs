@@ -107,10 +107,9 @@ class JacobianDemo():
         x0 = np.array([0.307, 0, 0.487]) # corresponds to neutral position
 
         ## STUDENT CODE GOES HERE
+        xdes = x0 + np.array([0,ry*np.cos(f*t), rz* np.sin(f*t)])
+        vdes = np.array([0, -ry*f*np.sin(f*t), rz*f*np.cos(f*t)])
 
-        # TODO: replace these!
-        xdes = JacobianDemo.x0
-        vdes = np.array([0,0,0])
         Rdes = np.diag([1., -1., -1.])
         ang_vdes = 0.0 * np.array([1.0, 0.0, 0.0])
         ## END STUDENT CODE
