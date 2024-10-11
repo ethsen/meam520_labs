@@ -141,16 +141,15 @@ class JacobianDemo():
         # The end effector will rotate around the x-axis during the line motion
         # following the changing ang.
 
-        """
         ang = -np.pi + (np.pi/4.0) * sin(f*t)
         r = ang * np.array([1.0, 0.0, 0.0])
         Rdes = rotvec_to_matrix(r)
 
         ang_v = (np.pi/4.0) * f * cos(f*t)
         ang_vdes = ang_v * np.array([1.0, 0.0, 0.0])
-        """
-        Rdes = np.diag([1., -1., -1.])
-        ang_vdes = 0.0 * np.array([1.0, 0.0, 0.0])
+        
+        #Rdes = np.diag([1., -1., -1.])
+        #ang_vdes = 0.0 * np.array([1.0, 0.0, 0.0])
         ## END STUDENT CODE
         return Rdes, ang_vdes, xdes, vdes
 
