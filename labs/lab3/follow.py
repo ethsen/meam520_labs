@@ -118,7 +118,7 @@ class JacobianDemo():
         
         return Rdes, ang_vdes, xdes, vdes
 
-    def line(t,f=1.0,L=.15):
+    def line(t,f=0.5,L=.15):
         """
         Calculate the position and velocity of the line trajector
 
