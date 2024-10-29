@@ -1,5 +1,6 @@
 import numpy as np 
-from lib.calcJacobian import calcJacobian
+#from lib.calcJacobian import calcJacobian
+from calcJacobian import calcJacobian
 
 
 
@@ -23,7 +24,7 @@ def IK_velocity(q_in, v_in, omega_in):
      v_in = v_in.reshape((3,1))
      omega_in = omega_in.reshape((3,1))
 
-     j = np.round(calcJacobian(q_in),3)
+     j = calcJacobian(q_in)
      xi = np.vstack((v_in, omega_in))  
      JMasked = j[np.hstack((v_mask, omega_mask)).flatten(), :]
      xiMasked = xi[np.hstack((v_mask, omega_mask)).flatten(), :]
