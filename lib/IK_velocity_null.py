@@ -1,9 +1,9 @@
 import numpy as np
-#from lib.IK_velocity import IK_velocity
-#from lib.calcJacobian import calcJacobian
+from lib.IK_velocity import IK_velocity
+from lib.calcJacobian import calcJacobian
 
-from IK_velocity import IK_velocity
-from calcJacobian import calcJacobian
+#from IK_velocity import IK_velocity
+#from calcJacobian import calcJacobian
 
 """
 Lab 3
