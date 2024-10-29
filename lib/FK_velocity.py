@@ -11,6 +11,7 @@ def FK_velocity(q_in, dq):
 
     ## STUDENT CODE GOES HERE
     j = calcJacobian(q_in)
+    print(np.linalg.det(j))
 
     velo = j @ dq
     #velocity = np.zeros((6, 1))
@@ -19,5 +20,5 @@ def FK_velocity(q_in, dq):
 if __name__ == '__main__':
     #q= np.array([0, 0, 0, -np.pi/2, 0, np.pi/2, np.pi/4])
     q= np.array([0, 0, 0, 0, 0, 0, 0])
-    dq = np.array([1,0,0,0,0,0,0])
+    dq = np.array([10,0,0,0,0,0,0])
     print(np.round(FK_velocity(q,dq),3))
