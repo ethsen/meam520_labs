@@ -148,6 +148,8 @@ class JacobianDemo():
 
         ang_v = (np.pi/4.0) * f * cos(f*t)
         ang_vdes = ang_v * np.array([1.0, 0.0, 0.0])
+        Rdes = np.diag([1., -1., -1.])
+        ang_vdes = 0.0 * np.array([1.0, 0.0, 0.0])
 
         ## END STUDENT CODE
         return Rdes, ang_vdes, xdes, vdes
