@@ -18,6 +18,6 @@ def calcManipulability(q_in):
     M = J_pos @ J_pos.T
 
     u,s, vt= np.linalg.svd(J)
-    mu = np.prod(np.diagonal(s))
+    mu = np.prod(s)
 
     return mu, M

@@ -2,15 +2,15 @@ import numpy as np
 from math import pi, acos
 from scipy.linalg import null_space
 
-#from lib.calcJacobian import calcJacobian
-#from lib.calculateFK import FK
-#from lib.calcAngDiff import calcAngDiff
-# from lib.IK_velocity import IK_velocity  #optional
+from lib.calcJacobian import calcJacobian
+from lib.calculateFK import FK
+from lib.calcAngDiff import calcAngDiff
+from lib.IK_velocity import IK_velocity  #optional
 
-from calcJacobian import calcJacobian
-from calculateFK import FK
-from calcAngDiff import calcAngDiff
-from IK_velocity import IK_velocity
+#from calcJacobian import calcJacobian
+#from calculateFK import FK
+#from calcAngDiff import calcAngDiff
+#from IK_velocity import IK_velocity
 
 class IK:
 
@@ -173,12 +173,10 @@ class IK:
         j = calcJacobian(q)
         if method == 'J_pseudo':
             jPinv = np.linalg.pinv(j)
-
             dq = jPinv @ des.T
             
         else:
-
-            dq = (displacement  @ j.T[:3])
+            dq = j.T @ des
 
         return dq
 
@@ -240,7 +238,7 @@ class IK:
         
         ## gradient descent:
         while True:
-            rollout.append(q)
+            rollout.append(q.copy())
 
             # Primary Task - Achieve End Effector Pose
             dq_ik = IK.end_effector_task(q,target, method)
@@ -249,17 +247,16 @@ class IK:
             dq_center = IK.joint_centering_task(q)
 
             ## Task Prioritization
-            dq = -alpha*dq_ik
             j  = calcJacobian(q)
             jPinv = np.linalg.pinv(j)
             null = (np.eye(7) - (jPinv @ j)) @ dq_center
-            dq = -alpha*(dq_ik+null)
+            dq = alpha*(dq_ik+null)
             # Check termination conditions
             if len(rollout) > self.max_steps or  np.linalg.norm(dq_ik) < self.min_step_size:
                 break
 
             # update q
-            q +=dq
+            q = q + dq
 
 
         success, message = self.is_valid_solution(q,target)
@@ -287,7 +284,7 @@ if __name__ == "__main__":
     
 
     # Using pseudo-inverse 
-    q_pseudo, rollout_pseudo, success_pseudo, message_pseudo = ik.inverse(target, seed, method='J_pseudo', alpha=.5)
+    q_pseudo, rollout_pseudo, success_pseudo, message_pseudo = ik.inverse(target, seed, method='J_pseudo', alpha=.53)
 
     for i, q_pseudo in enumerate(rollout_pseudo):
         joints, pose = ik.fk.forward(q_pseudo)
@@ -295,21 +292,21 @@ if __name__ == "__main__":
         print('iteration:',i,' q =',q_pseudo, ' d={d:3.4f}  ang={ang:3.3f}'.format(d=d,ang=ang))
 
     # Using pseudo-inverse 
-    """
-    rans, rollout_trans, success_trans, message_trans = ik.inverse(target, seed, method='J_trans', alpha=.5)
+    
+    rans, rollout_trans, success_trans, message_trans = ik.inverse(target, seed, method='J_trans', alpha=.60)
 
     for i, q_trans in enumerate(rollout_trans):
         joints, pose = ik.fk.forward(q_trans)
         d, ang = IK.distance_and_angle(target,pose)
         print('iteration:',i,' q =',q_trans, ' d={d:3.4f}  ang={ang:3.3f}'.format(d=d,ang=ang))
-    """
+    
 
     # compare
     print("\n method: J_pseudo-inverse")
     print("   Success: ",success_pseudo, ":  ", message_pseudo)
     print("   Solution: ",q_pseudo)
     print("   #Iterations : ", len(rollout_pseudo))
-    #print("\n method: J_transpose")
-    #print("   Success: ",success_trans, ":  ", message_trans)
-    #print("   Solution: ",q_trans)
-    #print("   #Iterations :", len(rollout_trans),'\n')
+    print("\n method: J_transpose")
+    print("   Success: ",success_trans, ":  ", message_trans)
+    print("   Solution: ",q_trans)
+    print("   #Iterations :", len(rollout_trans),'\n')
