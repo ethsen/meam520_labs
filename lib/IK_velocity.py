@@ -1,6 +1,6 @@
 import numpy as np 
-from lib.calcJacobian import calcJacobian
-#from calcJacobian import calcJacobian
+#from lib.calcJacobian import calcJacobian
+from calcJacobian import calcJacobian
 
 
 

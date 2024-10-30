@@ -2,18 +2,21 @@ import numpy as np
 from math import pi, acos
 from scipy.linalg import null_space
 
-from lib.calcJacobian import calcJacobian
-from lib.calculateFK import FK
-from lib.calcAngDiff import calcAngDiff
+#from lib.calcJacobian import calcJacobian
+#from lib.calculateFK import FK
+#from lib.calcAngDiff import calcAngDiff
 # from lib.IK_velocity import IK_velocity  #optional
 
+from calcJacobian import calcJacobian
+from calculateFK import FK
+from calcAngDiff import calcAngDiff
+from IK_velocity import IK_velocity
 
 class IK:
 
     # JOINT LIMITS
     lower = np.array([-2.8973,-1.7628,-2.8973,-3.0718,-2.8973,-0.0175,-2.8973])
-    upper = np.array([2.8973,1.7628,2.8973,-0.0698,2.8973,3.7525,2.8973])
-
+    upper = np.array([2.8973,1.7628,2.8973,-0.0698,2.8973,3.7525,2.8973])  
     center = lower + (upper - lower) / 2 # compute middle of range of motion of each joint
     fk = FK()
 
@@ -68,8 +71,8 @@ class IK:
         """
 
         ## STUDENT CODE STARTS HERE
-        displacement = np.zeros(3)
-        axis = np.zeros(3)
+        displacement = target[:-1,-1] -  current[:-1,-1]
+        axis = calcAngDiff(target[:-1,:-1], current[:-1,:-1])
 
         ## END STUDENT CODE
         return displacement, axis
@@ -96,9 +99,11 @@ class IK:
         """
         
         ## STUDENT CODE STARTS HERE
-        distance = 0
-        angle = 0
-
+        distance, _ = IK.displacement_and_axis(G,H)
+        distance = np.linalg.norm(distance, ord=2)
+        rot = G[:-1,:-1] @ H[:-1,:-1].T
+        inner = np.clip((np.trace(rot)-1)/2, -1.0, 1.0)
+        angle = np.arccos(inner)
         ## END STUDENT CODE
         return distance, angle
 
@@ -121,10 +126,24 @@ class IK:
 
         ## STUDENT CODE STARTS HERE
         success = False
-        message = "Solution found/not found + reason"
-
-        ## END STUDENT CODE
-        return success, message
+        if np.all(q >= IK.lower) and np.all(q <= IK.upper):
+    
+            _,T0e  = IK.fk.forward(q)
+            displacement, angle  = IK.distance_and_angle(T0e,target)
+            
+            if displacement > self.linear_tol:
+                message = "Solution not found: Displacement greater than linear tolerance"
+                return success, message
+            elif angle > self.angular_tol:
+                message = "Solution not found: Angle greater than angular tolerance"
+                return success, message
+            else:
+                success = True
+                message = "Solution found"
+                return success, message
+        else:
+            message = "Solution not found: At least one joint exceeds the joint limits"
+            return success, message
 
     ####################
     ## Task Functions ##
@@ -147,11 +166,20 @@ class IK:
         dq - a desired joint velocity to perform this task, which will smoothly
         decay to zero magnitude as the task is achieved
         """
+    
+        _,T0e  = IK.fk.forward(q)
+        displacement, axis = IK.displacement_and_axis(target, T0e)
+        des = np.hstack((displacement,axis))
+        j = calcJacobian(q)
+        if method == 'J_pseudo':
+            jPinv = np.linalg.pinv(j)
 
-        ## STUDENT CODE STARTS HERE
-        dq = np.zeros(7)
+            dq = jPinv @ des.T
+            
+        else:
 
-        ## END STUDENT CODE
+            dq = (displacement  @ j.T[:3])
+
         return dq
 
     @staticmethod
@@ -221,14 +249,18 @@ class IK:
             dq_center = IK.joint_centering_task(q)
 
             ## Task Prioritization
-
+            dq = -alpha*dq_ik
+            j  = calcJacobian(q)
+            jPinv = np.linalg.pinv(j)
+            null = (np.eye(7) - (jPinv @ j)) @ dq_center
+            dq = -alpha*(dq_ik+null)
             # Check termination conditions
-            break
+            if len(rollout) > self.max_steps or  np.linalg.norm(dq_ik) < self.min_step_size:
+                break
 
             # update q
-            
+            q +=dq
 
-        ## END STUDENT CODE
 
         success, message = self.is_valid_solution(q,target)
         return q, rollout, success, message
@@ -252,6 +284,7 @@ if __name__ == "__main__":
         [0,0,-1,.5],
         [0,0,0, 1],
     ])
+    
 
     # Using pseudo-inverse 
     q_pseudo, rollout_pseudo, success_pseudo, message_pseudo = ik.inverse(target, seed, method='J_pseudo', alpha=.5)
@@ -262,19 +295,21 @@ if __name__ == "__main__":
         print('iteration:',i,' q =',q_pseudo, ' d={d:3.4f}  ang={ang:3.3f}'.format(d=d,ang=ang))
 
     # Using pseudo-inverse 
-    q_trans, rollout_trans, success_trans, message_trans = ik.inverse(target, seed, method='J_trans', alpha=.5)
+    """
+    rans, rollout_trans, success_trans, message_trans = ik.inverse(target, seed, method='J_trans', alpha=.5)
 
     for i, q_trans in enumerate(rollout_trans):
         joints, pose = ik.fk.forward(q_trans)
         d, ang = IK.distance_and_angle(target,pose)
         print('iteration:',i,' q =',q_trans, ' d={d:3.4f}  ang={ang:3.3f}'.format(d=d,ang=ang))
+    """
 
     # compare
     print("\n method: J_pseudo-inverse")
     print("   Success: ",success_pseudo, ":  ", message_pseudo)
     print("   Solution: ",q_pseudo)
     print("   #Iterations : ", len(rollout_pseudo))
-    print("\n method: J_transpose")
-    print("   Success: ",success_trans, ":  ", message_trans)
-    print("   Solution: ",q_trans)
-    print("   #Iterations :", len(rollout_trans),'\n')
+    #print("\n method: J_transpose")
+    #print("   Success: ",success_trans, ":  ", message_trans)
+    #print("   Solution: ",q_trans)
+    #print("   #Iterations :", len(rollout_trans),'\n')
