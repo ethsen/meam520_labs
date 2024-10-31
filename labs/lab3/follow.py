@@ -199,10 +199,14 @@ class JacobianDemo():
                 kr = 5.0
                 omega = ang_vdes + kr * calcAngDiff(Rdes, R).flatten()
 
-
+                """
                 ## STUDENT CODE MODIFY HERE, DEFINE SECONDARY TASK IN THE NULL SPACE
                 lower = np.array([-2.8973, -1.7628, -2.8973, -3.0718, -2.8973, -0.0175, -2.8973])
                 upper = np.array([2.8973, 1.7628, 2.8973, -0.0698, 2.8973, 3.7525, 2.8973])
+                q_e = lower + (upper - lower) / 2
+                """
+                upper = np.array([2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100,2.6100])
+                lower = -1*upper
                 q_e = lower + (upper - lower) / 2
                 k0 = 1.0
 
