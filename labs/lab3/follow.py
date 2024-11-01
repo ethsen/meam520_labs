@@ -132,6 +132,7 @@ class JacobianDemo():
         Rdes = 3x3 np array of target end effector orientation in the world frame
         ang_vdes = 0x3 np array of target end effector orientation velocity in the rotation vector representation in the world frame
         """
+        f = f* 2* np.pi
         ## STUDENT CODE GOES HERE
         x0 = np.array([0.307,0,0.487]) #corresponds to neutral position
         # TODO: replace these!
@@ -199,7 +200,7 @@ class JacobianDemo():
                 kr = 5.0
                 omega = ang_vdes + kr * calcAngDiff(Rdes, R).flatten()
 
-                """
+                
                 ## STUDENT CODE MODIFY HERE, DEFINE SECONDARY TASK IN THE NULL SPACE
                 lower = np.array([-2.8973, -1.7628, -2.8973, -3.0718, -2.8973, -0.0175, -2.8973])
                 upper = np.array([2.8973, 1.7628, 2.8973, -0.0698, 2.8973, 3.7525, 2.8973])
@@ -208,6 +209,7 @@ class JacobianDemo():
                 upper = np.array([2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100,2.6100])
                 lower = -1*upper
                 q_e = lower + (upper - lower) / 2
+                """
                 k0 = 1.0
 
                 # Velocity Inverse Kinematics
