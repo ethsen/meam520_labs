@@ -140,7 +140,7 @@ def transform(d,rpy):
 # valid transformation matrices from a translation vector and Euler angles, or a
 # sequence of successive rotations around z, y, and x. You are free to use these
 # to generate your own tests, or directly write out transforms you wish to test.
-
+"""
 targets = [
     transform( np.array([-.2, -.3, .5]), np.array([0,pi,pi])            ),
     transform( np.array([-.2, .3, .5]),  np.array([pi/6,5/6*pi,7/6*pi]) ),
@@ -152,6 +152,19 @@ targets = [
     transform( np.array([.2, -.6, 0.5]), np.array([pi/4,pi-pi/2,pi])    ),
     transform( np.array([.5, 0, 0.2]),   np.array([0,pi-pi/2,pi])       ),
     transform( np.array([.4, 0, 0.2]),   np.array([pi/2,pi-pi/2,pi])    ),
+]
+"""
+targets = [
+    transform( np.array([.2, -.3, .5]), np.array([0,pi,pi])            ),
+    transform( np.array([.2, .3, .5]),  np.array([pi/6,5/6*pi,7/6*pi]) ),
+    transform( np.array([-.5, 0, .5]),    np.array([0,pi,pi])            ),
+    transform( np.array([.7, 0, -.5]),    np.array([0,pi,pi])            ),
+    transform( np.array([-.2, .6, 0.5]),  np.array([0,pi,pi])            ),
+    transform( np.array([.2, .6, 0.5]),  np.array([0,pi,pi-pi/2])       ),
+    transform( np.array([-.2, -.6, 0.5]), np.array([0,pi-pi/2,pi])       ),
+    transform( np.array([-.2, -.6, -0.5]), np.array([pi/4,pi-pi/2,pi])    ),
+    transform( np.array([.5, 0, -0.2]),   np.array([0,pi-pi/2,pi])       ),
+    transform( np.array([-.4, 0, 0.2]),   np.array([pi/2,pi-pi/2,pi])    ),
 ]
 
 ####################

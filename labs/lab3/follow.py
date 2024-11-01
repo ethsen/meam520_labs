@@ -132,7 +132,6 @@ class JacobianDemo():
         Rdes = 3x3 np array of target end effector orientation in the world frame
         ang_vdes = 0x3 np array of target end effector orientation velocity in the rotation vector representation in the world frame
         """
-        f = f* 2* np.pi
         ## STUDENT CODE GOES HERE
         x0 = np.array([0.307,0,0.487]) #corresponds to neutral position
         # TODO: replace these!
