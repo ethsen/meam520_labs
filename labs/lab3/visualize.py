@@ -153,14 +153,6 @@ targets = [
     transform( np.array([.5, 0, 0.2]),   np.array([0,pi-pi/2,pi])       ),
     transform( np.array([.4, 0, 0.2]),   np.array([pi/2,pi-pi/2,pi])    ),
 ]
-"""
-targets = [
-    transform( np.array([.1, .2, .5]), np.array([0,pi,pi])            ),
-    transform( np.array([.2, -.3, .5]),  np.array([pi/6,5/6*pi,7/6*pi]) ),
-    transform( np.array([.5, 0, .5]),    np.array([0,pi,pi])            ),
-    transform( np.array([.2, -.3, .5]),    np.array([0,pi,pi])            ),
-    transform( np.array([.5, 0, .5]),    np.array([pi,0,pi])            )
-]
 
 ####################
 ## Test Execution ##
