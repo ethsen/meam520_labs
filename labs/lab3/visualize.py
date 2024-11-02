@@ -206,6 +206,9 @@ if __name__ == "__main__":
     timetaken= []
     itTaken = []
     successCount = 0
+    lower = np.array([-2.8973,-1.7628,-2.8973,-3.0718,-2.8973,-0.0175,-2.8973])
+    upper = np.array([2.8973,1.7628,2.8973,-0.0698,2.8973,3.7525,2.8973])  
+    center = lower + (upper - lower) / 2 # compute middle of range of motion of each joint
     # Iterates through the given targets, using your IK solution
     # Try editing the targets list above to do more testing!
     for i, target in enumerate(targetConfigs):
@@ -215,11 +218,12 @@ if __name__ == "__main__":
         print("Solving... ")
         show_pose(target,"target")
 
-        seed = arm.neutral_position() # use neutral configuration as seed
+        #seed = arm.neutral_position() # use neutral configuration as seed
+        seed = center
         #seed = np.array([0,0,0,0,pi/2,pi/4, pi/4])
 
         start = perf_counter()
-        q, rollout, success, message = ik.inverse(target, seed, method='J_psedo', alpha=.6)  #try both methods
+        q, rollout, success, message = ik.inverse(target, seed, method='J_pseudo', alpha=.6)  #try both methods
         stop = perf_counter()
         dt = stop - start
         timetaken.append(dt)
