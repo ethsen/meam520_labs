@@ -192,11 +192,11 @@ class JacobianDemo():
                 curr_x = np.copy(x.flatten())
 
                 # First Order Integrator, Proportional Control with Feed Forward
-                kp = 0.01
+                kp = 5.0
                 v = vdes + kp * (xdes - curr_x)
                 
                 # Rotation
-                kr = 0.01
+                kr = 5.0
                 omega = ang_vdes + kr * calcAngDiff(Rdes, R).flatten()
 
                 
