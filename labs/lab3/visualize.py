@@ -203,7 +203,9 @@ if __name__ == "__main__":
     arm = ArmController()
     seed = arm.neutral_position()
     arm.safe_move_to_position(seed)
-
+    timetaken= []
+    itTaken = []
+    successCount = 0
     # Iterates through the given targets, using your IK solution
     # Try editing the targets list above to do more testing!
     for i, target in enumerate(targetConfigs):
@@ -220,8 +222,10 @@ if __name__ == "__main__":
         q, rollout, success, message = ik.inverse(target, seed, method='J_pseudo', alpha=.53)  #try both methods
         stop = perf_counter()
         dt = stop - start
-
+        timetaken.append(dt)
+        itTaken.append(len(rollout))
         if success:
+            successCount+=1
             print("Solution found in {time:2.2f} seconds ({it} iterations).".format(time=dt,it=len(rollout)))
             arm.safe_move_to_position(q)
 
@@ -236,3 +240,13 @@ if __name__ == "__main__":
 
         if i < len(targets) - 1:
             input("Press Enter to move to next target...")
+
+    print("avg Time: ",np.mean(timetaken))
+    print("median Time: ",np.median(timetaken))
+    print("max Time: ",np.max(timetaken))
+    
+    print("avg IT: ",np.mean(itTaken))
+    print("median IT: ",np.median(itTaken))
+    print("max IT: ",np.max(itTaken))
+
+    print("Success Rate: ", (successCount/25))
