@@ -219,7 +219,7 @@ if __name__ == "__main__":
         #seed = np.array([0,0,0,0,pi/2,pi/4, pi/4])
 
         start = perf_counter()
-        q, rollout, success, message = ik.inverse(target, seed, method='J_pseudo', alpha=.50)  #try both methods
+        q, rollout, success, message = ik.inverse(target, seed, method='J_psedo', alpha=.6)  #try both methods
         stop = perf_counter()
         dt = stop - start
         timetaken.append(dt)
