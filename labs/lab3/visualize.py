@@ -212,6 +212,7 @@ if __name__ == "__main__":
     # Iterates through the given targets, using your IK solution
     # Try editing the targets list above to do more testing!
     q = arm.neutral_position()
+    seed = q
     for i, target in enumerate(targetConfigs):
         _,target = fk.forward(target)
         print("Target " + str(i) + " located at:")
@@ -220,7 +221,6 @@ if __name__ == "__main__":
         show_pose(target,"target")
 
         #seed = arm.neutral_position() # use neutral configuration as seed
-        seed = q
         #seed = np.array([0,0,0,0,pi/2,pi/4, pi/4])
 
         start = perf_counter()
@@ -233,6 +233,7 @@ if __name__ == "__main__":
             successCount+=1
             print("Solution found in {time:2.2f} seconds ({it} iterations).".format(time=dt,it=len(rollout)))
             arm.safe_move_to_position(q)
+            seed = q
 
             # Visualize
             if visulaize_mani_ellipsoid:
