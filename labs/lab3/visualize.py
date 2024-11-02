@@ -212,7 +212,7 @@ if __name__ == "__main__":
     # Iterates through the given targets, using your IK solution
     # Try editing the targets list above to do more testing!
     q = arm.neutral_position()
-    seed = center
+    #seed = center
     for i, target in enumerate(targetConfigs):
         _,target = fk.forward(target)
         print("Target " + str(i) + " located at:")
@@ -220,7 +220,7 @@ if __name__ == "__main__":
         print("Solving... ")
         show_pose(target,"target")
 
-        #seed = arm.neutral_position() # use neutral configuration as seed
+        seed = arm.neutral_position() # use neutral configuration as seed
         #seed = np.array([0,0,0,0,pi/2,pi/4, pi/4])
 
         start = perf_counter()
