@@ -211,6 +211,7 @@ if __name__ == "__main__":
     center = lower + (upper - lower) / 2 # compute middle of range of motion of each joint
     # Iterates through the given targets, using your IK solution
     # Try editing the targets list above to do more testing!
+    q = arm.neutral_position()
     for i, target in enumerate(targetConfigs):
         _,target = fk.forward(target)
         print("Target " + str(i) + " located at:")
@@ -219,7 +220,7 @@ if __name__ == "__main__":
         show_pose(target,"target")
 
         #seed = arm.neutral_position() # use neutral configuration as seed
-        seed = center
+        seed = q
         #seed = np.array([0,0,0,0,pi/2,pi/4, pi/4])
 
         start = perf_counter()
