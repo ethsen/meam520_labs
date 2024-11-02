@@ -29,7 +29,7 @@ def IK_velocity_null(q_in, v_in, omega_in, b):
     b = b.reshape((7, 1))
     null = (np.eye(7) -  (jPinv @ JMasked))  @ b
 
-    return dq +null.flatten()
+    return dq + null.flatten()
 
 
 if __name__ == '__main__':

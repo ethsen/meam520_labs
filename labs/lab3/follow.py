@@ -16,7 +16,7 @@ from lib.calcAngDiff import calcAngDiff
 from lib.calcManipulability import calcManipulability
 
 #####################
-## Rotation Helper ##
+## Rotation Helper# ##
 #####################
 
 def rotvec_to_matrix(rotvec):
