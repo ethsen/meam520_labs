@@ -164,34 +164,6 @@ targets = [
     transform( np.array([.5, 0, .5]),    np.array([pi,0,pi])            )
 ]
 
-targetConfigs = np.array([
-    [ 0.1523,  0.2314, -0.5231, -1.5708,  0.4231,  1.8675,  0.4231],
-    [-1.2341,  0.8234,  1.2341, -1.5708, -1.2341,  1.8675, -0.8234],
-    [ 0.8234, -0.5231,  0.8234, -1.5708,  0.8234,  1.8675,  1.2341],
-    [-0.5231,  0.4231, -1.2341, -1.5708, -0.5231,  1.8675, -1.2341],
-    [ 1.2341, -0.8234,  0.4231, -1.5708,  1.2341,  1.8675,  0.8234],
-    [-0.8234,  1.2341, -0.8234, -1.5708, -0.8234,  1.8675, -0.4231],
-    [ 0.4231, -1.2341,  1.2341, -1.5708,  0.4231,  1.8675,  0.5231],
-    [-1.2341,  0.4231, -0.4231, -1.5708, -1.2341,  1.8675, -1.2341],
-    [ 0.8234, -0.8234,  0.8234, -1.5708,  0.8234,  1.8675,  0.8234],
-    [-0.4231,  1.2341, -1.2341, -1.5708, -0.4231,  1.8675, -0.8234],
-    [ 1.2341, -0.4231,  0.4231, -1.5708,  1.2341,  1.8675,  1.2341],
-    [-0.8234,  0.8234, -0.8234, -1.5708, -0.8234,  1.8675, -0.4231],
-    [ 0.4231, -1.2341,  1.2341, -1.5708,  0.4231,  1.8675,  0.8234],
-    [-1.2341,  0.4231, -0.4231, -1.5708, -1.2341,  1.8675, -1.2341],
-    [ 0.8234, -0.8234,  0.8234, -1.5708,  0.8234,  1.8675,  0.4231],
-    [-0.4231,  1.2341, -1.2341, -1.5708, -0.4231,  1.8675, -0.8234],
-    [ 1.2341, -0.4231,  0.4231, -1.5708,  1.2341,  1.8675,  1.2341],
-    [-0.8234,  0.8234, -0.8234, -1.5708, -0.8234,  1.8675, -0.4231],
-    [ 0.4231, -1.2341,  1.2341, -1.5708,  0.4231,  1.8675,  0.8234],
-    [-1.2341,  0.4231, -0.4231, -1.5708, -1.2341,  1.8675, -1.2341],
-    [ 0.8234, -0.8234,  0.8234, -1.5708,  0.8234,  1.8675,  0.4231],
-    [-0.4231,  1.2341, -1.2341, -1.5708, -0.4231,  1.8675, -0.8234],
-    [ 1.2341, -0.4231,  0.4231, -1.5708,  1.2341,  1.8675,  1.2341],
-    [-0.8234,  0.8234, -0.8234, -1.5708, -0.8234,  1.8675, -0.4231],
-    [ 0.4231, -1.2341,  1.2341, -1.5708,  0.4231,  1.8675,  0.8234]
-])
-
 ####################
 ## Test Execution ##
 ####################
@@ -212,43 +184,47 @@ if __name__ == "__main__":
     # Iterates through the given targets, using your IK solution
     # Try editing the targets list above to do more testing!
     q = arm.neutral_position()
+    alphas = [0.09, 0.49]
+    methods = ['J_pseudo', 'J_trans']
     #seed = center
-    for i, target in enumerate(targetConfigs):
-        _,target = fk.forward(target)
-        print("Target " + str(i) + " located at:")
-        print(target)
-        print("Solving... ")
-        show_pose(target,"target")
+    for j in range(len(alphas)):
+        alpha = alphas[j]
+        method = methods[j]
+        for i in range(51):
+            _,target = fk.forward(ik.generateTarget())
+            print("Target " + str(i) + " located at:")
+            print(target)
+            print("Solving... ")
+            show_pose(target,"target")
 
-        seed = arm.neutral_position() # use neutral configuration as seed
-        #seed = np.array([0,0,0,0,pi/2,pi/4, pi/4])
+            seed = arm.neutral_position() # use neutral configuration as seed
+            #seed = np.array([0,0,0,0,pi/2,pi/4, pi/4])
 
-        start = perf_counter()
-        q, rollout, success, message = ik.inverse(target, seed, method='J_pseuo', alpha=.53)  #try both methods
-        stop = perf_counter()
-        dt = stop - start
-        timetaken.append(dt)
-        itTaken.append(len(rollout))
-        if success:
-            successCount+=1
-            print("Solution found in {time:2.2f} seconds ({it} iterations).".format(time=dt,it=len(rollout)))
-            arm.safe_move_to_position(q)
-            #seed = q
+            start = perf_counter()
+            q, rollout, success, message = ik.inverse(target, seed, method, alpha)  #try both methods
+            stop = perf_counter()
+            dt = stop - start
+            timetaken.append(dt)
+            itTaken.append(len(rollout))
+            if success:
+                successCount+=1
+                print("Solution found in {time:2.2f} seconds ({it} iterations).".format(time=dt,it=len(rollout)))
+                arm.safe_move_to_position(q)
+                #seed = q
+                # Visualize
+                if visulaize_mani_ellipsoid:
+                    mu, M = calcManipulability(q)
+                    show_manipulability_ellipsoid(M)
+                    print('Manipulability Index',mu)
+            else:
+                print('IK Failed for this target using this seed.')
 
-            # Visualize
-            if visulaize_mani_ellipsoid:
-                mu, M = calcManipulability(q)
-                show_manipulability_ellipsoid(M)
-                print('Manipulability Index',mu)
-        else:
-            print('IK Failed for this target using this seed.')
+        print("avg Time: ",np.mean(timetaken))
+        print("median Time: ",np.median(timetaken))
+        print("max Time: ",np.max(timetaken))
+        
+        print("avg IT: ",np.mean(itTaken))
+        print("median IT: ",np.median(itTaken))
+        print("max IT: ",np.max(itTaken))
 
-    print("avg Time: ",np.mean(timetaken))
-    print("median Time: ",np.median(timetaken))
-    print("max Time: ",np.max(timetaken))
-    
-    print("avg IT: ",np.mean(itTaken))
-    print("median IT: ",np.median(itTaken))
-    print("max IT: ",np.max(itTaken))
-
-    print("Success Rate: ", (successCount/25))
+        print("Success Rate: ", (successCount/50))

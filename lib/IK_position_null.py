@@ -40,7 +40,7 @@ class IK:
         # solver parameters
         self.linear_tol = linear_tol
         self.angular_tol = angular_tol
-        self.max_steps = max_steps
+        self.max_steps = 500
         self.min_step_size = min_step_size
 
 
@@ -261,31 +261,51 @@ class IK:
 
         success, message = self.is_valid_solution(q,target)
         return q, rollout, success, message
+    
+    @staticmethod
+    def generateTarget(margin = 0.1):  
+        config = np.random.uniform(IK.lower + margin,IK.upper - margin)
+        return config
+        
 
 ################################
 ## Simple Testing Environment ##
 ################################
+
+
 
 if __name__ == "__main__":
 
     np.set_printoptions(suppress=True,precision=5)
 
     ik = IK()
-
     # matches figure in the handout
     seed = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
 
-    target = np.array([
-        [0,-1,0,-0.2],
-        [-1,0,0,0],
-        [0,0,-1,.5],
-        [0,0,0, 1],
-    ])
-    
-
-    # Using pseudo-inverse 
-    q_pseudo, rollout_pseudo, success_pseudo, message_pseudo = ik.inverse(target, seed, method='J_pseudo', alpha=.53)
-
+    """
+    #Testing for best Alpha
+    alpha = 0
+    bestSuccess = 0
+    #bestIter = 1000
+    for i in range(100):
+        print(i)
+        #iterCount = []
+        successCount = 0
+        alpha += 0.01
+        for j in range(50):
+            _, target = ik.fk.forward(ik.generateTarget())
+            # Using pseudo-inverse 
+            q, rollout, success, message = ik.inverse(target, seed, method='J_psedo',alpha = alpha)
+            if success:
+                successCount+=1
+        if successCount > bestSuccess:
+            bestSuccess = successCount
+            bestAlpha = alpha
+    print(bestAlpha)
+    print(bestSuccess)
+    #print(bestIter)
+        
+    """
     for i, q_pseudo in enumerate(rollout_pseudo):
         joints, pose = ik.fk.forward(q_pseudo)
         d, ang = IK.distance_and_angle(target,pose)
