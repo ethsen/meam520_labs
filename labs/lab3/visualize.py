@@ -184,7 +184,7 @@ if __name__ == "__main__":
     # Iterates through the given targets, using your IK solution
     # Try editing the targets list above to do more testing!
     q = arm.neutral_position()
-    alphas = [0.09, 0.49]
+    alphas = [0.52, 0.49]
     methods = ['J_pseudo', 'J_trans']
     #seed = center
     for j in range(len(alphas)):
@@ -192,9 +192,9 @@ if __name__ == "__main__":
         method = methods[j]
         for i in range(51):
             _,target = fk.forward(ik.generateTarget())
-            print("Target " + str(i) + " located at:")
-            print(target)
-            print("Solving... ")
+            #print("Target " + str(i) + " located at:")
+            #print(target)
+            #print("Solving... ")
             show_pose(target,"target")
 
             seed = arm.neutral_position() # use neutral configuration as seed
@@ -208,7 +208,7 @@ if __name__ == "__main__":
             itTaken.append(len(rollout))
             if success:
                 successCount+=1
-                print("Solution found in {time:2.2f} seconds ({it} iterations).".format(time=dt,it=len(rollout)))
+                #print("Solution found in {time:2.2f} seconds ({it} iterations).".format(time=dt,it=len(rollout)))
                 arm.safe_move_to_position(q)
                 #seed = q
                 # Visualize
@@ -216,9 +216,9 @@ if __name__ == "__main__":
                     mu, M = calcManipulability(q)
                     show_manipulability_ellipsoid(M)
                     print('Manipulability Index',mu)
-            else:
-                print('IK Failed for this target using this seed.')
-
+            #else:
+                #print('IK Failed for this target using this seed.')
+        print(method)
         print("avg Time: ",np.mean(timetaken))
         print("median Time: ",np.median(timetaken))
         print("max Time: ",np.max(timetaken))

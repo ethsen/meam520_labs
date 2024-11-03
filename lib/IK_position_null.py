@@ -40,7 +40,7 @@ class IK:
         # solver parameters
         self.linear_tol = linear_tol
         self.angular_tol = angular_tol
-        self.max_steps = 500
+        self.max_steps = 300
         self.min_step_size = min_step_size
 
 
@@ -282,12 +282,12 @@ if __name__ == "__main__":
     # matches figure in the handout
     seed = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
 
-    """
+    
     #Testing for best Alpha
     alpha = 0
     bestSuccess = 0
     #bestIter = 1000
-    for i in range(100):
+    for i in range(55):
         print(i)
         #iterCount = []
         successCount = 0
@@ -295,9 +295,10 @@ if __name__ == "__main__":
         for j in range(50):
             _, target = ik.fk.forward(ik.generateTarget())
             # Using pseudo-inverse 
-            q, rollout, success, message = ik.inverse(target, seed, method='J_psedo',alpha = alpha)
+            q, rollout, success, message = ik.inverse(target, seed, method='J_pseuo',alpha = alpha)
             if success:
                 successCount+=1
+                #iterCount.append(len(rollout))
         if successCount > bestSuccess:
             bestSuccess = successCount
             bestAlpha = alpha
@@ -330,3 +331,4 @@ if __name__ == "__main__":
     print("   Success: ",success_trans, ":  ", message_trans)
     print("   Solution: ",q_trans)
     print("   #Iterations :", len(rollout_trans),'\n')
+    """
