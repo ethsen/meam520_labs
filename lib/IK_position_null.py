@@ -1,16 +1,18 @@
 import numpy as np
 from math import pi, acos
 from scipy.linalg import null_space
+from time import perf_counter
 
-from lib.calcJacobian import calcJacobian
-from lib.calculateFK import FK
-from lib.calcAngDiff import calcAngDiff
-from lib.IK_velocity import IK_velocity  #optional
 
-#from calcJacobian import calcJacobian
-#from calculateFK import FK
-#from calcAngDiff import calcAngDiff
-#from IK_velocity import IK_velocity
+#from lib.calcJacobian import calcJacobian
+#from lib.calculateFK import FK
+#from lib.calcAngDiff import calcAngDiff
+#from lib.IK_velocity import IK_velocity  #optional
+
+from calcJacobian import calcJacobian
+from calculateFK import FK
+from calcAngDiff import calcAngDiff
+from IK_velocity import IK_velocity
 
 class IK:
 
@@ -40,7 +42,7 @@ class IK:
         # solver parameters
         self.linear_tol = linear_tol
         self.angular_tol = angular_tol
-        self.max_steps = 300
+        self.max_steps = max_steps
         self.min_step_size = min_step_size
 
 
@@ -232,10 +234,7 @@ class IK:
 
         q = seed
         rollout = []
-
-        ## STUDENT CODE STARTS HERE
-
-        
+      
         ## gradient descent:
         while True:
             rollout.append(q.copy())
@@ -263,9 +262,49 @@ class IK:
         return q, rollout, success, message
     
     @staticmethod
-    def generateTarget(margin = 0.1):  
-        config = np.random.uniform(IK.lower + margin,IK.upper - margin)
-        return config
+    def generateTarget(amt,margin = 0.25): 
+        configs =np.zeros((amt,7))
+        for i in range(amt):
+            configs[i] = np.random.uniform(IK.lower + margin,IK.upper - margin)
+        return configs
+    
+    @staticmethod
+    def test():
+        fk = FK()
+        alphas = [0.30, 0.50]
+        methods = ['J_pseudo', 'J_trans']
+        targets = IK.generateTarget(50)
+        seed = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
+        #seed = IK.center
+        for i in range(len(alphas)):
+            timeTaken =[]
+            itTaken = []
+            alpha = alphas[i]
+            method = methods[i]
+            successCount = 0
+            for targ in targets:
+                _,target = fk.forward(targ)
+                start = perf_counter()
+                q, rollout, success, message = ik.inverse(target, seed, method, alpha)  #try both methods
+                stop = perf_counter()
+                dt = stop - start
+                
+                if success:
+                    #seed = q
+                    successCount+=1
+                    timeTaken.append(dt)
+                    itTaken.append(len(rollout))
+
+            print(method)
+            print("avg Time: ",np.mean(timeTaken))
+            print("median Time: ",np.median(timeTaken))
+            print("max Time: ",np.max(timeTaken))
+            
+            print("avg IT: ",np.mean(itTaken))
+            print("median IT: ",np.median(itTaken))
+            print("max IT: ",np.max(itTaken))
+
+            print("Success Rate: ", (successCount/50))
         
 
 ################################
@@ -280,33 +319,43 @@ if __name__ == "__main__":
 
     ik = IK()
     # matches figure in the handout
-    seed = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
+    #seed = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
+    ik.test()
 
-    
+    """
     #Testing for best Alpha
     alpha = 0
     bestSuccess = 0
-    #bestIter = 1000
-    for i in range(55):
-        print(i)
-        #iterCount = []
+    bestScore = -1000
+    bestIter = ik.max_steps
+    targets = ik.generateTarget(15)
+    while alpha < 1:
+        iterCount = []
         successCount = 0
-        alpha += 0.01
-        for j in range(50):
-            _, target = ik.fk.forward(ik.generateTarget())
+        alpha += 0.1
+        for target in targets:
+            #print(j/50)
+            _, target = ik.fk.forward(target)
             # Using pseudo-inverse 
-            q, rollout, success, message = ik.inverse(target, seed, method='J_pseuo',alpha = alpha)
+            q, rollout, success, message = ik.inverse(target, seed, method='J_psedo',alpha = alpha)
             if success:
-                successCount+=1
-                #iterCount.append(len(rollout))
-        if successCount > bestSuccess:
-            bestSuccess = successCount
-            bestAlpha = alpha
-    print(bestAlpha)
-    print(bestSuccess)
-    #print(bestIter)
+                iters = len(rollout)
+                successCount += 1
+                iterCount.append(iters)
+
+        if iterCount:
+            if successCount > bestSuccess-1 and np.mean(iterCount) < bestIter:
+                bestSuccess = successCount
+                bestAlpha = alpha
+                bestIter = np.mean(iterCount)
+
+    #print("Most Successful Alpha: ", bestAlphaSuccess, " With: ",bestSuccess)
+    #print("Most Successful Alpha: ", bestAlphaIter, " With: ",bestIter)
+    print("Best Alpha Value: ", bestAlpha, "With Success Rate of: ", bestSuccess/len(targets), "And avg Iterations of: ", bestIter)       
+            
+
         
-    """
+    
     for i, q_pseudo in enumerate(rollout_pseudo):
         joints, pose = ik.fk.forward(q_pseudo)
         d, ang = IK.distance_and_angle(target,pose)
