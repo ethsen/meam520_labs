@@ -121,12 +121,12 @@ if __name__ == "__main__":
 
     # matches figure in the handout
     
-    q = np.array([0,0,0,0,0,0,0])
+    q = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
     #q = np.array([0,0,0,0,0,0,0])
     joint_positions, T0e = fk.forward(q)
     #fk.testPlot(joint_positions)
     #print(fk.get_axis_of_rotation(q))
     #print(fk.compute_Ai(q))
-    print(joint_positions)
-    #print("Joint Positions:\n",joint_positions)
+    print(np.round(T0e,4))
+    print("Joint Positions:\n",joint_positions)
     #print("End Effector Pose:\n",T0e)

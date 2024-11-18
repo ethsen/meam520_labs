@@ -14,16 +14,11 @@ def calcJacobian(q_in):
     J = np.zeros((6, 7))
     jw = fk.get_axis_of_rotation(q_in)
     aiCollection = fk.compute_Ai(q_in)
-    jointOffsets = np.stack(([0, 0, .141, 1], [0, 0, 0, 1], [0, 0, .195, 1],
-                         [0, 0, 0, 1], [0, 0, 0.125, 1], [0, 0, -.015, 1],
-                         [0, 0, .051, 1], [0, 0, 0, 1]), axis=0)
     jv = []
     for i in range(len(aiCollection)):
         if i == 0:
-            #originDiff = aiCollection[-1][:3,-1] - jointOffsets[i][:3].T
             originDiff = aiCollection[-1][:3,-1]
         else:
-            #originDiff = aiCollection[-1][:3,-1] - (aiCollection[i-1][:3,-1]+ jointOffsets[i][:3].T)
             originDiff = aiCollection[-1][:3,-1] - (aiCollection[i-1][:3,-1])
         jv.append(np.cross(jw[i],originDiff))
         
@@ -35,6 +30,6 @@ def calcJacobian(q_in):
     return J
 
 if __name__ == '__main__':
-    #q= np.array([0, 0, 0, -np.pi/2, 0, np.pi/2, np.pi/4])
-    q= np.array([0, 0, 0, 0, 0, 0, 0])
-    print(np.round(calcJacobian(q),3))
+    q= np.array([0, 0, 0, -np.pi/2, 0, np.pi/2, np.pi/4])
+    #q= np.array([0, 0, 0, 0, 0, 0, 0])
+    print(np.round(calcJacobian(q),4))
