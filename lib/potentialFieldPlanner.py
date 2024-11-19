@@ -375,6 +375,7 @@ class PotentialFieldPlanner:
                 jointPosOld = jointPosNew
 
 
+
         return q_path
     
     
