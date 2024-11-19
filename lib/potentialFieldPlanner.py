@@ -74,7 +74,7 @@ class PotentialFieldPlanner:
             att_f = -(diff /np.linalg.norm(diff))
 
         else:
-            if joint > 6:
+            if joint > 5:
                 xi = 15
             else: 
                 xi = 30 #attractive field strength
@@ -187,9 +187,9 @@ class PotentialFieldPlanner:
         ## STUDENT CODE STARTS HERE
         attForces = np.zeros((3,9))
 
-        for i in range(1,len(target)):
+        for i in range(len(target)):
             attForce = PotentialFieldPlanner.attractive_force(target[i],current[i],i)
-            attForces[:,i-1] = attForce.flatten()
+            attForces[:,i] = attForce.flatten()
         repForces = np.zeros((3,9))
         for obs in obstacle:
             dist,unit = PotentialFieldPlanner.dist_point2box(current, obs)
@@ -197,8 +197,9 @@ class PotentialFieldPlanner:
                 repForce = PotentialFieldPlanner.repulsive_force(dist[i],current[i], unit[i])
                 repForces[:,i-1] = repForce.flatten()
 
-        plotAttractiveVector(PotentialFieldPlanner.ax,target, current, (attForces - repForces).T,obstacle)
-        return attForces + repForces
+        joint_forces = attForces+repForces
+        plotAttractiveVector(PotentialFieldPlanner.ax,target, current, (joint_forces).T,obstacle)
+        return joint_forces
                     
 
             
@@ -222,12 +223,9 @@ class PotentialFieldPlanner:
         ## STUDENT CODE STARTS HERE
         joint_torques = np.zeros((9,9))
         for i in range(len(joint_torques)):
-            linJac = PotentialFieldPlanner.fk.calcLinJacobian(q,i)
+            linJac = PotentialFieldPlanner.fk.calcLinJacobian(q,i+1)
             joint_torques[i]= (linJac.T @ joint_forces[:,i])
-            """#only considering 3 joints behind the target joint
-            if i >2:
-                joint_torques[i,:i-3] = 0
-            """
+
         ## END STUDENT CODE
         joint_torques =np.sum(joint_torques, axis = 0).flatten()
         return joint_torques
@@ -277,13 +275,12 @@ class PotentialFieldPlanner:
         ## STUDENT CODE STARTS HERE
         targetJointPos, _ = PotentialFieldPlanner.fk.forward_expanded(target)
         currJointPos, _ =  PotentialFieldPlanner.fk.forward_expanded(q)
-        forces = PotentialFieldPlanner.compute_forces(targetJointPos, map_struct.obstacles, currJointPos)
+        forces = PotentialFieldPlanner.compute_forces(targetJointPos[1:], map_struct.obstacles, currJointPos[1:])
         torques = PotentialFieldPlanner.compute_torques(forces, q)
         dq = torques[:7]
         #dq =  np.concatenate((torques[:6], [torques[-1]]))
 
-       #print(np.linalg.norm(dq))
-        
+       #print(np.linalg.norm(dq)) 
         dq = dq /np.linalg.norm(dq)
 
 
@@ -344,7 +341,7 @@ class PotentialFieldPlanner:
             
             # Compute gradient 
             # TODO: this is how to change your joint angles 
-
+            
             dq = PotentialFieldPlanner.compute_gradient(q,goal,map_struct)
             qNew = q + alpha*dq
             jointPosNew,  _ = PotentialFieldPlanner.fk.forward_expanded(qNew)
@@ -369,7 +366,7 @@ class PotentialFieldPlanner:
                 break # exit the while loop if conditions are met!
             
             elif np.linalg.norm(dq) < self.min_step_size :
-                random_perturbation = np.random.uniform(-.1, 0.1, size=q.shape)
+                random_perturbation = np.random.uniform(-0.5, 0.5, size=q.shape)
                 q = q + random_perturbation
                 #steps -=1
             else:

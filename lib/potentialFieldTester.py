@@ -59,7 +59,7 @@ def plotAttractiveVector(ax, target, current, force, obstacles):
     
     # Plot the force vectors
     ax.quiver(
-        current[1:, 0], current[1:, 1], current[1:, 2],  # Start point of the vector
+        current[:, 0], current[:, 1], current[:, 2],  # Start point of the vector
         force[:, 0], force[:, 1], force[:, 2],       # Components of the vector
         color='green', label='Force Vectors'
     )
@@ -199,7 +199,6 @@ def plotJacobianCalculation(ax, current_joints, T0eCol, joint_index):
     joint_index - the joint we're currently calculating the Jacobian for
     """
     ax.cla()
-    
     # Plot robot arm configuration
     ax.plot(current_joints[:, 0], current_joints[:, 1], current_joints[:, 2], 
             'b-', linewidth=2, label='Robot Arm')
@@ -213,7 +212,7 @@ def plotJacobianCalculation(ax, current_joints, T0eCol, joint_index):
     
     # For each joint up to joint_index, show its contribution to the Jacobian
     j= 0
-    while j != joint_index+1:
+    while j != joint_index:
         # Get current joint position
         joint_pos = current_joints[j]
 

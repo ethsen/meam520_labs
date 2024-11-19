@@ -104,12 +104,12 @@ class FK_Jac():
             A = A @ np.array([a1,a2,a3,a4])
             transformationList.append(A)
 
-        vJoint1T = T0e @ np.array([[1,0,0,0],
+        vJoint1T = A @ np.array([[1,0,0,0],
                                    [0,1,0,0.1],
                                    [0,0,1,-.105],
                                    [0,0,0,1]])
 
-        vJoint2T = T0e @ np.array([[1,0,0,0],
+        vJoint2T = A @ np.array([[1,0,0,0],
                                    [0,1,0,-0.1],
                                    [0,0,1,-.105],
                                    [0,0,0,1]])
@@ -124,8 +124,7 @@ class FK_Jac():
         jointPos, T0eCol = self.forward_expanded(q)
         T0eCol = np.round(T0eCol,3)
         jv = np.zeros((3,9))
-        if i == 0:
-            return jv
+
         j = 0
         while j != i:
             #if i >
@@ -135,7 +134,6 @@ class FK_Jac():
             jv[:,j]= np.cross(jw,originDiff).flatten()
             j+=1
             #print(np.round(jv,4))
-        jv[:,6] = 0
         return jv
     
     
