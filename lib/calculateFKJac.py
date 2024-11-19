@@ -1,5 +1,7 @@
 import numpy as np
 from math import pi
+import matplotlib as plt
+from potentialFieldTester import * 
 
 
 class FK_Jac():
@@ -122,27 +124,37 @@ class FK_Jac():
         jointPos, T0eCol = self.forward_expanded(q)
         T0eCol = np.round(T0eCol,3)
         jv = np.zeros((3,9))
+        if i == 0:
+            return jv
         j = 0
         while j != i:
+            #if i >
             jw = T0eCol[j][:3,2]
             #originDiff = T0eCol[i+1][:3,-1] - T0eCol[j][:3,-1]
-            originDiff = jointPos[i+1] - jointPos[j]
+            originDiff = jointPos[i] - jointPos[j]
             jv[:,j]= np.cross(jw,originDiff).flatten()
             j+=1
             #print(np.round(jv,4))
-
+        jv[:,6] = 0
         return jv
-
+    
     
 if __name__ == "__main__":
 
     fk = FK_Jac()
-
+    
     # matches figure in the handout
     q = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
-    joint_positions, T0e = fk.forward_expanded(q)
+    #q = np.array([0,0,0,0,0,0,0])
+    fig = plt.figure(figsize=(10, 10))
+    ax = fig.add_subplot(111, projection='3d')
+    jointPos, T0eCol =  fk.forward_expanded(q)
 
+    for i in range(10):
+        jv = fk.calcLinJacobian(q,i)
+        print(np.round(jv,3))
+        plotJacobianCalculation(ax, jointPos, T0eCol,i)
     #print("Joint Positions:\n",joint_positions)
     #print("End Effector Pose:\n",T0e)
-    print(np.round(joint_positions,4))
+    #print(np.round(joint_positions,4))
     #print(np.round(fk.calcLinJacobian(q,8),4))

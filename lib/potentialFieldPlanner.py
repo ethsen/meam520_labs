@@ -6,14 +6,14 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 
-from lib.calculateFKJac import FK_Jac
-from lib.detectCollision import detectCollision
-from lib.loadmap import loadmap
+#from lib.calculateFKJac import FK_Jac
+#from lib.detectCollision import detectCollision
+#from lib.loadmap import loadmap
 
-#from loadmap import loadmap
-#from calculateFKJac import FK_Jac
-#from detectCollision import detectCollision
-
+from loadmap import loadmap
+from calculateFKJac import FK_Jac
+from detectCollision import detectCollision
+from potentialFieldTester import *
 
 class PotentialFieldPlanner:
 
@@ -23,6 +23,9 @@ class PotentialFieldPlanner:
 
     center = lower + (upper - lower) / 2 # compute middle of range of motion of each joint
     fk = FK_Jac()
+    plt.ion()  # Turn on interactive mode
+    fig = plt.figure()  
+    ax = fig.add_subplot(111, projection='3d')
 
     def __init__(self, tol=1e-4, max_steps=500, min_step_size=1e-5):
         """
@@ -41,7 +44,7 @@ class PotentialFieldPlanner:
         self.tol = tol
         self.max_steps = max_steps
         self.min_step_size = min_step_size
-
+        
 
     ######################
     ## Helper Functions ##
@@ -69,6 +72,7 @@ class PotentialFieldPlanner:
         diff = current - target
         if np.linalg.norm(diff)**2 > d:
             att_f = -(diff /np.linalg.norm(diff))
+
         else:
             if joint > 6:
                 xi = 15
@@ -101,8 +105,8 @@ class PotentialFieldPlanner:
 
         ## STUDENT CODE STARTS HERE
 
-        eta = 0.001 # repulsive field strength
-        d0 = 0.12
+        eta = -.001 # repulsive field strength
+        d0 = 0.25
         rep_f = np.zeros((3, 1))
 
         if distance < d0:
@@ -186,21 +190,20 @@ class PotentialFieldPlanner:
         for i in range(1,len(target)):
             attForce = PotentialFieldPlanner.attractive_force(target[i],current[i],i)
             attForces[:,i-1] = attForce.flatten()
-        
         repForces = np.zeros((3,9))
         for obs in obstacle:
             dist,unit = PotentialFieldPlanner.dist_point2box(current, obs)
-            for i in range(1,len(repForces)):
+            for i in range(1,len(target)):
                 repForce = PotentialFieldPlanner.repulsive_force(dist[i],current[i], unit[i])
-                repForces[:,i-1] += repForce.flatten()
+                repForces[:,i-1] = repForce.flatten()
 
+        plotAttractiveVector(PotentialFieldPlanner.ax,target, current, (attForces - repForces).T,obstacle)
         return attForces + repForces
                     
 
             
         ## END STUDENT CODE
 
-    
     @staticmethod
     def compute_torques(joint_forces, q):
         """
@@ -221,6 +224,10 @@ class PotentialFieldPlanner:
         for i in range(len(joint_torques)):
             linJac = PotentialFieldPlanner.fk.calcLinJacobian(q,i)
             joint_torques[i]= (linJac.T @ joint_forces[:,i])
+            """#only considering 3 joints behind the target joint
+            if i >2:
+                joint_torques[i,:i-3] = 0
+            """
         ## END STUDENT CODE
         joint_torques =np.sum(joint_torques, axis = 0).flatten()
         return joint_torques
@@ -273,7 +280,8 @@ class PotentialFieldPlanner:
         forces = PotentialFieldPlanner.compute_forces(targetJointPos, map_struct.obstacles, currJointPos)
         torques = PotentialFieldPlanner.compute_torques(forces, q)
         dq = torques[:7]
-        
+        #dq =  np.concatenate((torques[:6], [torques[-1]]))
+
        #print(np.linalg.norm(dq))
         
         dq = dq /np.linalg.norm(dq)
@@ -340,12 +348,14 @@ class PotentialFieldPlanner:
             dq = PotentialFieldPlanner.compute_gradient(q,goal,map_struct)
             qNew = q + alpha*dq
             jointPosNew,  _ = PotentialFieldPlanner.fk.forward_expanded(qNew)
-            #collision = False
+            #plotTorqueVectors(PotentialFieldPlanner.ax, jointPosOld, goalJointPos,dq, map_struct.obstacles)
+
+            collision = False
             for obs in map_struct.obstacles:
                 test = detectCollision(jointPosOld, jointPosNew,obs)
                 if any(test):
                     indices = np.where(test)[0]
-                    #collision = True
+                    collision = True
                     modified_dq = dq.copy()
                     for idx in indices:
                         modified_dq[:idx+1] = -dq[:idx+1]
@@ -388,7 +398,7 @@ if __name__ == "__main__":
     goal =  np.array([-1.2, 1.57 , 1.57, -2.07, -1.57, 1.57, 0.7])
 
     #start = np.array([0,0,0,0,0,0,0])
-    #goal =  np.array([0,0,0,0,0,0,0.01])
+    #goal =  np.array([0,0,0,0,0,0,1])
     # potential field planning
     q_path = planner.plan(deepcopy(map_struct), deepcopy(start), deepcopy(goal))
     
