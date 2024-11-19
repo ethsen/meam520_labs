@@ -27,7 +27,7 @@ class PotentialFieldPlanner:
     fig = plt.figure()  
     ax = fig.add_subplot(111, projection='3d')
 
-    def __init__(self, tol=1e-4, max_steps=500, min_step_size=1e-5):
+    def __init__(self, tol=1e-4, max_steps=2000, min_step_size=1e-5):
         """
         Constructs a potential field planner with solver parameters.
 
@@ -281,8 +281,7 @@ class PotentialFieldPlanner:
         dq = torques[:7]
         #dq =  np.concatenate((torques[:6], [torques[-1]]))
 
-       #print(np.linalg.norm(dq)) 
-        dq = dq /np.linalg.norm(dq)
+       #print(np.linalg.norm(dq))
 
 
         ## END STUDENT CODE
@@ -344,6 +343,9 @@ class PotentialFieldPlanner:
             # TODO: this is how to change your joint angles 
             
             dq = PotentialFieldPlanner.compute_gradient(q,goal,map_struct)
+            if np.linalg.norm(q-goal) > 0.1:
+                dq = dq / np.linalg.norm(dq)
+                
             qNew = q + alpha*dq
             jointPosNew,  _ = PotentialFieldPlanner.fk.forward_expanded(qNew)
             #plotTorqueVectors(PotentialFieldPlanner.ax, jointPosOld, goalJointPos,dq, map_struct.obstacles)
@@ -369,16 +371,19 @@ class PotentialFieldPlanner:
             elif np.linalg.norm(dq) < self.min_step_size:
                 random_perturbation = np.random.uniform(-0.5, 0.5, size=q.shape)
                 q = q + random_perturbation
-            elif len(q_path) > 20 and np.linalg.norm(qNew - q_path[len(q_path)-20]) < 0.1:
-                random_perturbation = np.random.uniform(-0.5, 0.5, size=q.shape)
-                q = q + random_perturbation
+            
             else:
                     #print(np.linalg.norm(qNew - q_path[len(q_path)-20]))
                 q_path = np.vstack([q_path,qNew])
                 q = qNew.copy()
                 jointPosOld = jointPosNew
 
+            """
+            elif len(q_path) > 20 and np.linalg.norm(qNew - q_path[len(q_path)-20]) < 0.1:
+                random_perturbation = np.random.uniform(-0.5, 0.5, size=q.shape)
+                q = q + random_perturbation
 
+            """
 
         return q_path
     

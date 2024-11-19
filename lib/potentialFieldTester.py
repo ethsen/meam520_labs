@@ -59,7 +59,7 @@ def plotAttractiveVector(ax, target, current, force, obstacles):
     
     # Plot the force vectors
     ax.quiver(
-        current[1:, 0], current[1:, 1], current[1:, 2],  # Start point of the vector
+        current[:, 0], current[:, 1], current[:, 2],  # Start point of the vector
         force[:, 0], force[:, 1], force[:, 2],       # Components of the vector
         color='green', label='Force Vectors'
     )
