@@ -191,6 +191,7 @@ class PotentialFieldPlanner:
             attForce = PotentialFieldPlanner.attractive_force(target[i],current[i],i)
             attForces[:,i] = attForce.flatten()
         repForces = np.zeros((3,9))
+        
         for obs in obstacle:
             dist,unit = PotentialFieldPlanner.dist_point2box(current, obs)
             for i in range(1,len(target)):
@@ -365,11 +366,14 @@ class PotentialFieldPlanner:
                 q_path = np.vstack([q_path,qNew])
                 break # exit the while loop if conditions are met!
             
-            elif np.linalg.norm(dq) < self.min_step_size :
+            elif np.linalg.norm(dq) < self.min_step_size:
                 random_perturbation = np.random.uniform(-0.5, 0.5, size=q.shape)
                 q = q + random_perturbation
-                #steps -=1
+            elif len(q_path) > 20 and np.linalg.norm(qNew - q_path[len(q_path)-20]) < 0.1:
+                random_perturbation = np.random.uniform(-0.5, 0.5, size=q.shape)
+                q = q + random_perturbation
             else:
+                    #print(np.linalg.norm(qNew - q_path[len(q_path)-20]))
                 q_path = np.vstack([q_path,qNew])
                 q = qNew.copy()
                 jointPosOld = jointPosNew

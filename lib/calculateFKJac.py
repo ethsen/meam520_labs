@@ -122,14 +122,10 @@ class FK_Jac():
 
 
         jointPos, T0eCol = self.forward_expanded(q)
-        T0eCol = np.round(T0eCol,3)
         jv = np.zeros((3,9))
-
         j = 0
         while j != i:
-            #if i >
             jw = T0eCol[j][:3,2]
-            #originDiff = T0eCol[i+1][:3,-1] - T0eCol[j][:3,-1]
             originDiff = jointPos[i] - jointPos[j]
             jv[:,j]= np.cross(jw,originDiff).flatten()
             j+=1
@@ -148,10 +144,10 @@ if __name__ == "__main__":
     ax = fig.add_subplot(111, projection='3d')
     jointPos, T0eCol =  fk.forward_expanded(q)
 
-    for i in range(10):
-        jv = fk.calcLinJacobian(q,i)
+    for i in range(9):
+        jv = fk.calcLinJacobian(q,i+1)
         print(np.round(jv,3))
-        plotJacobianCalculation(ax, jointPos, T0eCol,i)
+        plotJacobianCalculation(ax, jointPos, T0eCol,i+1)
     #print("Joint Positions:\n",joint_positions)
     #print("End Effector Pose:\n",T0e)
     #print(np.round(joint_positions,4))
