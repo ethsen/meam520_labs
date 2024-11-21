@@ -24,7 +24,7 @@ class PotentialFieldPlanner:
     upper = np.array([2.8973,1.7628,2.8973,-0.0698,2.8973,3.7525,2.8973])
 
     center = lower + (upper - lower) / 2 # compute middle of range of motion of each joint
-    fk = FK_Jac()
+    #fk = FK_Jac()
     #plt.ion()  # Turn on interactive mode
     #fig = plt.figure()  
     #ax = fig.add_subplot(111, projection='3d')
@@ -82,7 +82,7 @@ class PotentialFieldPlanner:
             if joint > 5:
                 xi = 15
             else: 
-                xi = 50 #attractive field strength
+                xi = 30 #attractive field strength
             att_f = -xi* (diff)
 
         ## END STUDENT CODE
@@ -110,7 +110,7 @@ class PotentialFieldPlanner:
 
         ## STUDENT CODE STARTS HERE
 
-        eta = -.01 # repulsive field strength
+        eta = -.001 # repulsive field strength
         d0 = .12
         rep_f = np.zeros((3, 1))
     
@@ -403,6 +403,7 @@ class PotentialFieldPlanner:
                 break # exit the while loop if conditions are met!
             elif (not valid) or (len(q_path) > 20 and self.q_distance(qNew, q_path[len(q_path)-20]) < 0.1 and dis > 1):
                 q_path = q_path[:-20]
+
                 while True:
                     
                     random_perturbation = np.random.uniform(-0.5, 0.5, size=q.shape)
@@ -472,10 +473,10 @@ if __name__ == "__main__":
     goal =  np.array([2.2,-1.5,0,-.25,-2,0,0])
     """
 
-    #TEST 4
-    map_struct = loadmap("maps/map3.txt")
-    start = np.array([-2,1.5,2,-2,-2,1,.7])
-    goal =  np.array([2,1.5,2,-1,2,1,.7])
+    #TEST 5
+    map_struct = loadmap("maps/map4.txt")
+    start = np.array([0,-1,0,-2,0,1.57,0])
+    goal =  np.array([-1.9, 1.57 , 1.57, -2.07, -1.57, 1.57, 0.7])
     # potential field planning
     q_path = planner.plan(deepcopy(map_struct), deepcopy(start), deepcopy(goal))
     
