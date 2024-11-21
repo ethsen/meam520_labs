@@ -2,8 +2,8 @@ import numpy as np
 from math import pi, acos
 from scipy.linalg import null_space
 from copy import deepcopy
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
+#import matplotlib.pyplot as plt
+#from matplotlib.animation import FuncAnimation
 
 
 from lib.calculateFKJac import FK_Jac
