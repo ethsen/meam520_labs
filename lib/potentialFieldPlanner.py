@@ -24,7 +24,7 @@ class PotentialFieldPlanner:
     upper = np.array([2.8973,1.7628,2.8973,-0.0698,2.8973,3.7525,2.8973])
 
     center = lower + (upper - lower) / 2 # compute middle of range of motion of each joint
-    #fk = FK_Jac()
+    fk = FK_Jac()
     #plt.ion()  # Turn on interactive mode
     #fig = plt.figure()  
     #ax = fig.add_subplot(111, projection='3d')
