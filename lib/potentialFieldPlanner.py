@@ -6,14 +6,16 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 
-#from lib.calculateFKJac import FK_Jac
-#from lib.detectCollision import detectCollision
-#from lib.loadmap import loadmap
+from lib.calculateFKJac import FK_Jac
+from lib.detectCollision import detectCollision
+from lib.loadmap import loadmap
+from lib.calcJacobian import calcJacobian
 
-from loadmap import loadmap
-from calculateFKJac import FK_Jac
-from detectCollision import detectCollision
-from potentialFieldTester import *
+#from calcJacobian import calcJacobian
+#from loadmap import loadmap
+#from calculateFKJac import FK_Jac
+#from detectCollision import detectCollision
+#from potentialFieldTester import *
 
 class PotentialFieldPlanner:
 
@@ -23,11 +25,11 @@ class PotentialFieldPlanner:
 
     center = lower + (upper - lower) / 2 # compute middle of range of motion of each joint
     fk = FK_Jac()
-    plt.ion()  # Turn on interactive mode
-    fig = plt.figure()  
-    ax = fig.add_subplot(111, projection='3d')
+    #plt.ion()  # Turn on interactive mode
+    #fig = plt.figure()  
+    #ax = fig.add_subplot(111, projection='3d')
 
-    def __init__(self, tol=1e-4, max_steps=2000, min_step_size=1e-5):
+    def __init__(self, tol=0.1, max_steps=5000, min_step_size=1e-5):
         """
         Constructs a potential field planner with solver parameters.
 
@@ -73,11 +75,14 @@ class PotentialFieldPlanner:
         if np.linalg.norm(diff)**2 > d:
             att_f = -(diff /np.linalg.norm(diff))
 
+        elif np.linalg.norm(diff) < 0.1:
+            xi = 1
+            att_f = -xi* (diff)
         else:
             if joint > 5:
                 xi = 15
             else: 
-                xi = 30 #attractive field strength
+                xi = 50 #attractive field strength
             att_f = -xi* (diff)
 
         ## END STUDENT CODE
@@ -105,10 +110,10 @@ class PotentialFieldPlanner:
 
         ## STUDENT CODE STARTS HERE
 
-        eta = -.001 # repulsive field strength
-        d0 = 0.25
+        eta = -.01 # repulsive field strength
+        d0 = .12
         rep_f = np.zeros((3, 1))
-
+    
         if distance < d0:
             rep_f = eta * ((1 / distance) - (1 / d0)) * (1 / distance**2) * unitvec.reshape(-1,1)
 
@@ -182,24 +187,25 @@ class PotentialFieldPlanner:
         joint_forces - 3x9 numpy array representing the force vectors on each 
         joint/end effector
         """
-        joint_forces = np.zeros((3, 9))
+        joint_forces = np.zeros((3, current.shape[0]))
         
         ## STUDENT CODE STARTS HERE
-        attForces = np.zeros((3,9))
+        attForces = np.zeros((3,current.shape[0]))
+        repForces = np.zeros((3,current.shape[0]))
 
         for i in range(len(target)):
             attForce = PotentialFieldPlanner.attractive_force(target[i],current[i],i)
             attForces[:,i] = attForce.flatten()
-        repForces = np.zeros((3,9))
         
         for obs in obstacle:
             dist,unit = PotentialFieldPlanner.dist_point2box(current, obs)
-            for i in range(1,len(target)):
+            #print(dist)
+            for i in range(len(target)):
                 repForce = PotentialFieldPlanner.repulsive_force(dist[i],current[i], unit[i])
-                repForces[:,i-1] = repForce.flatten()
+                repForces[:,i] = repForce.flatten()
 
         joint_forces = attForces+repForces
-        plotAttractiveVector(PotentialFieldPlanner.ax,target, current, (joint_forces).T,obstacle)
+        #plotAttractiveVector(PotentialFieldPlanner.ax,target, current, (joint_forces).T,obstacle)
         return joint_forces
                     
 
@@ -222,7 +228,7 @@ class PotentialFieldPlanner:
         """
 
         ## STUDENT CODE STARTS HERE
-        joint_torques = np.zeros((9,9))
+        joint_torques = np.zeros((joint_forces.shape[1],joint_forces.shape[1]))
         for i in range(len(joint_torques)):
             linJac = PotentialFieldPlanner.fk.calcLinJacobian(q,i+1)
             joint_torques[i]= (linJac.T @ joint_forces[:,i])
@@ -252,7 +258,7 @@ class PotentialFieldPlanner:
         ## STUDENT CODE STARTS HERE
 
         distance = np.linalg.norm(target - current)
-
+        #print(distance)
         ## END STUDENT CODE
 
         return distance
@@ -278,33 +284,58 @@ class PotentialFieldPlanner:
         currJointPos, _ =  PotentialFieldPlanner.fk.forward_expanded(q)
         forces = PotentialFieldPlanner.compute_forces(targetJointPos[1:], map_struct.obstacles, currJointPos[1:])
         torques = PotentialFieldPlanner.compute_torques(forces, q)
-        dq = torques[:7]
-        #dq =  np.concatenate((torques[:6], [torques[-1]]))
+        dq = torques[[0,1,3,4,6,8,9]]
+        dq = dq/ np.linalg.norm(dq)
 
-       #print(np.linalg.norm(dq))
 
 
         ## END STUDENT CODE
 
         return dq
     
-    def testPlot(jointPositions1,jointPositions2):
-        ax = plt.figure().add_subplot(projection='3d')
-        ax.plot(jointPositions1[:,0], jointPositions1[:,1], jointPositions1[:,2])
-        ax.scatter(jointPositions1[:,0], jointPositions1[:,1], jointPositions1[:,2], c= 'red')
-        ax.plot(jointPositions2[:,0], jointPositions2[:,1], jointPositions2[:,2])
-        ax.scatter(jointPositions2[:,0], jointPositions2[:,1], jointPositions2[:,2], c= 'blue')
-        #prism = Poly3DCollection([box],edgecolor='g',facecolor='g',alpha=0.5)
-        #ax.add_collection3d(prism)
+    @staticmethod
+    def secondaryTask(q, gaol):
+        """
+        Computes the secondary task of joint centering
 
-        ax.set_xlabel('X')
-        ax.set_ylabel('Y')
-        ax.set_zlabel('Z')
-        ax.set_xlim(-1, 1)
-        ax.set_ylim(-1, 1)
-        ax.set_zlim(0, 2)
-        plt.show()
+        INPUTS:
+        q - 1x7 numpy array. the current joint configuration, a "best guess" so far for the final answer
+        goal - 1x7 numpy array of goal joint configuration
+
+        OUTPUTS:
+        null - 1x7 numpy array. null space secondary task to add to dq. 
+        """
+        rate = 1e-4
+        J = calcJacobian(q)
+        jPinv = np.linalg.pinv(J)
+            
+        # Calculate proximity to limits
+        offset = 2 * (q - PotentialFieldPlanner.center) / (PotentialFieldPlanner.upper - PotentialFieldPlanner.lower)
+        b = rate * -offset 
+       
+        null = (np.eye(7) -  (jPinv @ J))  @ b
+
+        return null
+
+    @staticmethod
+    def checkJointLimits(q):
+        """
+        Checks if the given joint configuration is within the defined joint limits.
         
+        INPUTS:
+        q - 1x7 numpy array representing joint angles
+        
+        OUTPUTS:
+        valid - boolean indicating if configuration is within limits
+        """
+        violating_joints = []
+        
+        # Check each joint against its limits
+        for i in range(len(q)):
+            if q[i] < PotentialFieldPlanner.lower[i] or q[i] > PotentialFieldPlanner.upper[i]:
+                violating_joints.append(i)
+        
+        return len(violating_joints) == 0
     ###############################
     ### Potential Feild Solver  ###
     ###############################
@@ -343,47 +374,62 @@ class PotentialFieldPlanner:
             # TODO: this is how to change your joint angles 
             
             dq = PotentialFieldPlanner.compute_gradient(q,goal,map_struct)
-            if np.linalg.norm(q-goal) > 0.1:
-                dq = dq / np.linalg.norm(dq)
-                
-            qNew = q + alpha*dq
-            jointPosNew,  _ = PotentialFieldPlanner.fk.forward_expanded(qNew)
-            #plotTorqueVectors(PotentialFieldPlanner.ax, jointPosOld, goalJointPos,dq, map_struct.obstacles)
+            null = PotentialFieldPlanner.secondaryTask(q,goal)
+            dq = dq + null
 
-            collision = False
+            qNew = q + alpha*dq
+            valid = PotentialFieldPlanner.checkJointLimits(qNew)
+            jointPosNew,  _ = PotentialFieldPlanner.fk.forward_expanded(qNew)
+            """
             for obs in map_struct.obstacles:
                 test = detectCollision(jointPosOld, jointPosNew,obs)
+                #print(test)
                 if any(test):
                     indices = np.where(test)[0]
-                    collision = True
                     modified_dq = dq.copy()
                     for idx in indices:
                         modified_dq[:idx+1] = -dq[:idx+1]
-                    reduced_alpha = alpha * 0.5
+                    reduced_alpha = alpha
                     #random_perturbation = np.random.uniform(-.05, 0.05, size=q.shape)
                     qNew = q + reduced_alpha * modified_dq #+ random_perturbation            
                     break
+            """
             # Termination Conditions
-            if self.q_distance(goal,qNew) < self.tol: # TODO: check termination conditions
+            dis =self.q_distance(qNew,goal)
+            #print(dis)
+            if dis < self.tol: # TODO: check termination conditions
                 q_path = np.vstack([q_path,qNew])
+                q_path = np.vstack([q_path,goal])
                 break # exit the while loop if conditions are met!
-            
-            elif np.linalg.norm(dq) < self.min_step_size:
-                random_perturbation = np.random.uniform(-0.5, 0.5, size=q.shape)
-                q = q + random_perturbation
-            
+            elif (not valid) or (len(q_path) > 20 and self.q_distance(qNew, q_path[len(q_path)-20]) < 0.1 and dis > 1):
+                q_path = q_path[:-20]
+                while True:
+                    
+                    random_perturbation = np.random.uniform(-0.5, 0.5, size=q.shape)
+                    qNew = q + random_perturbation
+                    valid = PotentialFieldPlanner.checkJointLimits(qNew)
+                    if not valid:
+                        continue
+                        
+                    collision = False
+                    jointPosNew, _ = PotentialFieldPlanner.fk.forward_expanded(qNew)
+                    for obs in map_struct.obstacles:
+                        if any(detectCollision(jointPosOld, jointPosNew, obs)):
+                            collision = True
+                            break
+                    
+                    # If configuration is valid and collision-free, accept it
+                    if valid and not collision:
+                        q = qNew
+                        q_path = np.vstack([q_path,qNew])
+                        break
+                
             else:
-                    #print(np.linalg.norm(qNew - q_path[len(q_path)-20]))
+                
                 q_path = np.vstack([q_path,qNew])
                 q = qNew.copy()
                 jointPosOld = jointPosNew
 
-            """
-            elif len(q_path) > 20 and np.linalg.norm(qNew - q_path[len(q_path)-20]) < 0.1:
-                random_perturbation = np.random.uniform(-0.5, 0.5, size=q.shape)
-                q = q + random_perturbation
-
-            """
 
         return q_path
     
@@ -398,14 +444,38 @@ if __name__ == "__main__":
 
     planner = PotentialFieldPlanner()
     
-    # inputs 
+    # inputs
+    """
+    #TEST 1
     map_struct = loadmap("maps/emptyMap.txt")
-    #map_struct = loadmap("maps/map1.txt")
     start = np.array([0,-1,0,-2,0,1.57,0])
     goal =  np.array([-1.2, 1.57 , 1.57, -2.07, -1.57, 1.57, 0.7])
+    #TEST 2
+    map_struct = loadmap("maps/map1.txt")
+    start = np.array([0,-1,0,-2,0,1.57,0])
+    goal =  np.array([-1.2, 1.57 , 1.57, -2.07, -1.57, 1.57, 0.7])
+    #TEST 3
+    map_struct = loadmap("maps/map2.txt")
+    start =  np.array([0,0,0,-pi/2,0,pi/2,pi/4])
+    goal = np.array([0,1.5,0,0,0,0,0])
+    #TEST 4
+    map_struct = loadmap("maps/map3.txt")
+    start = np.array([-2,1.5,2,-2,-2,1,.7])
+    goal =  np.array([2,1.5,2,-1,2,1,.7])
+    #TEST 5
+    map_struct = loadmap("maps/map4.txt")
+    start = np.array([0,-1,0,-2,0,1.57,0])
+    goal =  np.array([-1.2, 1.57 , 1.57, -2.07, -1.57, 1.57, 0.7])
+    #TEST 6
+    map_struct = loadmap("maps/map5.txt")
+    start = np.array([0,0,0,-.5,0,0,0])
+    goal =  np.array([2.2,-1.5,0,-.25,-2,0,0])
+    """
 
-    #start = np.array([0,0,0,0,0,0,0])
-    #goal =  np.array([0,0,0,0,0,0,1])
+    #TEST 4
+    map_struct = loadmap("maps/map3.txt")
+    start = np.array([-2,1.5,2,-2,-2,1,.7])
+    goal =  np.array([2,1.5,2,-1,2,1,.7])
     # potential field planning
     q_path = planner.plan(deepcopy(map_struct), deepcopy(start), deepcopy(goal))
     

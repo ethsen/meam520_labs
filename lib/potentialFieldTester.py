@@ -47,9 +47,12 @@ def plotAttractiveVector(ax, target, current, force, obstacles):
             [vertices[0], vertices[1], vertices[2], vertices[3]],  # Front
             [vertices[4], vertices[5], vertices[6], vertices[7]]   # Back
         ]
-        poly3d = [[tuple(vertex) for vertex in face] for face in faces]
-        ax.add_collection3d(Poly3DCollection(poly3d, facecolors='lightblue', linewidths=1, edgecolors='black', alpha=0.6))
+        #poly3d = [[tuple(vertex) for vertex in face] for face in faces]
+        #ax.add_collection3d(Poly3DCollection(poly3d, facecolors='lightblue', linewidths=1, edgecolors='black', alpha=0.6))
     
+    
+        ax.add_collection3d(Poly3DCollection(faces, facecolors='cyan', edgecolor='black', alpha=0.5))
+
     # Plot the target and current positions
     ax.plot(target[:, 0], target[:, 1], target[:, 2], c='red', label='Target Path')
     ax.scatter(target[:, 0], target[:, 1], target[:, 2], c='red', s=50, label='Target Positions')

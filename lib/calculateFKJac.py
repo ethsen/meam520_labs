@@ -1,7 +1,7 @@
 import numpy as np
 from math import pi
 import matplotlib as plt
-from potentialFieldTester import * 
+#from potentialFieldTester import * 
 
 
 class FK_Jac():
@@ -34,8 +34,10 @@ class FK_Jac():
         """
 
         # Your code starts here
-        jointPositions = np.zeros((10,3))
-        jointPositions[0,:] = [0,0,.141]
+        #jointPositions = np.zeros((10,3))
+        #jointPositions[0,:] = [0,0,.141]
+        jointPositions = []
+        jointPositions.append(np.array([0,0,.141]))
         T0eCol = []
         T0e = np.identity(4)
         T0eCol.append(T0e)
@@ -52,31 +54,63 @@ class FK_Jac():
             A = np.array([a1,a2,a3,a4])
             T0e = T0e @ A
             T0eCol.append(T0e)
-            jointPositions[i+1,:] = (T0e @ self.jointOffsets[i+1,:])[:3]
+            #jointPositions[i+1,:] = (T0e @ self.jointOffsets[i+1,:])[:3]
+            jointPositions.append((T0e @ self.jointOffsets[i+1,:])[:3])
 
-        vJoint1T = T0e @ np.array([[1,0,0,0],
+        
+        vJoint1T = T0eCol[1] @  np.array([[1,0,0,0],
+                                   [0,1,0,-0.0975],
+                                   [0,0,1,0],
+                                   [0,0,0,1]])
+        jointPositions.insert(2, vJoint1T[:3,3])
+        T0eCol.insert(2, vJoint1T)
+
+        #vJoint2T = T0eCol[5]
+        #jointPositions.insert(4, vJoint2T[:3,3])
+        #T0eCol.insert(4, vJoint2T)
+
+        vJoint3T = T0eCol[4] @ np.array([[1,0,0,0],
+                                   [0,1,0,0.0625],
+                                   [0,0,1,0],
+                                   [0,0,0,1]])
+
+        jointPositions.insert(5, vJoint3T[:3,3])
+        T0eCol.insert(5, vJoint3T)
+
+        vJoint4T = T0eCol[6] @ np.array([[1,0,0,0],
+                                   [0,1,0,.015],
+                                   [0,0,1,.2545],
+                                   [0,0,0,1]])
+        
+        jointPositions.insert(7,vJoint4T[:3,3])
+        T0eCol.insert(7, vJoint4T)
+        
+        vJoint5T = T0e @ np.array([[1,0,0,0],
                                    [0,1,0,0.1],
                                    [0,0,1,-.105],
                                    [0,0,0,1]])
+        T0eCol.append(vJoint5T)
+        #jointPositions[len(jointPositions)-2,: ] = vJoint5T[:3,3]
+        jointPositions.append(vJoint5T[:3,3])
 
-        vJoint2T = T0e @ np.array([[1,0,0,0],
+        vJoint6T = T0e @ np.array([[1,0,0,0],
                                    [0,1,0,-0.1],
                                    [0,0,1,-.105],
                                    [0,0,0,1]])
+    
+        T0eCol.append(vJoint6T)
+        #jointPositions[-1,:] = vJoint6T[:3,3]
+        jointPositions.append(vJoint6T[:3,3])
+
         #T0eCol.insert(len(T0eCol)-3, vJoint1T)
         #T0eCol.insert(len(T0eCol)-2, vJoint1T)
         #jointPositions[-1] = jointPositions[len(jointPositions)-3]
         #jointPositions[len(jointPositions)-3] = vJoint1T[:3,3]
         #jointPositions[len(jointPositions)-2] = vJoint2T[:3,3]
-        T0eCol.append(vJoint1T)
-        T0eCol.append(vJoint2T)
-        jointPositions[len(jointPositions)-2,: ] = vJoint1T[:3,3]
-        jointPositions[-1,:] = vJoint2T[:3,3]
-
 
         # Your code ends here
 
-        return jointPositions, np.array(T0eCol)
+        return np.array(jointPositions), np.array(T0eCol)
 
     # feel free to define additional helper methods to modularize your solution for lab 1
 
@@ -122,7 +156,7 @@ class FK_Jac():
 
 
         jointPos, T0eCol = self.forward_expanded(q)
-        jv = np.zeros((3,9))
+        jv = np.zeros((3,len(jointPos)-1))
         j = 0
         while j != i:
             jw = T0eCol[j][:3,2]
@@ -144,10 +178,10 @@ if __name__ == "__main__":
     ax = fig.add_subplot(111, projection='3d')
     jointPos, T0eCol =  fk.forward_expanded(q)
 
-    for i in range(9):
-        jv = fk.calcLinJacobian(q,i+1)
+    for i in range(len(jointPos)):
+        jv = fk.calcLinJacobian(q,i)
         print(np.round(jv,3))
-        plotJacobianCalculation(ax, jointPos, T0eCol,i+1)
+        plotJacobianCalculation(ax, jointPos, T0eCol,i)
     #print("Joint Positions:\n",joint_positions)
     #print("End Effector Pose:\n",T0e)
     #print(np.round(joint_positions,4))
