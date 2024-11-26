@@ -2,20 +2,20 @@ import numpy as np
 from math import pi, acos
 from scipy.linalg import null_space
 from copy import deepcopy
-#import matplotlib.pyplot as plt
-#from matplotlib.animation import FuncAnimation
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 
 
-from lib.calculateFKJac import FK_Jac
-from lib.detectCollision import detectCollision
-from lib.loadmap import loadmap
-from lib.calcJacobian import calcJacobian
+#from lib.calculateFKJac import FK_Jac
+#from lib.detectCollision import detectCollision
+#from lib.loadmap import loadmap
+#from lib.calcJacobian import calcJacobian
 
-#from calcJacobian import calcJacobian
-#from loadmap import loadmap
-#from calculateFKJac import FK_Jac
-#from detectCollision import detectCollision
-#from potentialFieldTester import *
+from calcJacobian import calcJacobian
+from loadmap import loadmap
+from calculateFKJac import FK_Jac
+from detectCollision import detectCollision
+from potentialFieldTester import *
 
 class PotentialFieldPlanner:
 
@@ -25,11 +25,11 @@ class PotentialFieldPlanner:
 
     center = lower + (upper - lower) / 2 # compute middle of range of motion of each joint
     fk = FK_Jac()
-    #plt.ion()  # Turn on interactive mode
-    #fig = plt.figure()  
-    #ax = fig.add_subplot(111, projection='3d')
+    plt.ion()  # Turn on interactive mode
+    fig = plt.figure()  
+    ax = fig.add_subplot(111, projection='3d')
 
-    def __init__(self, tol=0.1, max_steps=5000, min_step_size=1e-5):
+    def __init__(self, tol=0.75, max_steps=5000, min_step_size=1e-5):
         """
         Constructs a potential field planner with solver parameters.
 
@@ -205,7 +205,7 @@ class PotentialFieldPlanner:
                 repForces[:,i] = repForce.flatten()
 
         joint_forces = attForces+repForces
-        #plotAttractiveVector(PotentialFieldPlanner.ax,target, current, (joint_forces).T,obstacle)
+        plotAttractiveVector(PotentialFieldPlanner.ax,target, current, (joint_forces).T,obstacle)
         return joint_forces
                     
 
@@ -401,9 +401,11 @@ class PotentialFieldPlanner:
                 q_path = np.vstack([q_path,qNew])
                 q_path = np.vstack([q_path,goal])
                 break # exit the while loop if conditions are met!
-            elif (not valid) or (len(q_path) > 20 and self.q_distance(qNew, q_path[len(q_path)-20]) < 0.1 and dis > 1):
+            elif (not valid) or (len(q_path) > 20 and self.q_distance(qNew, q_path[len(q_path)-20]) < 0.1 ) and dis > 1:
                 q_path = q_path[:-20]
-
+                print(qNew)
+                print(goal)
+                print(dis)
                 while True:
                     
                     random_perturbation = np.random.uniform(-0.5, 0.5, size=q.shape)
@@ -473,10 +475,10 @@ if __name__ == "__main__":
     goal =  np.array([2.2,-1.5,0,-.25,-2,0,0])
     """
 
-    #TEST 5
-    map_struct = loadmap("maps/map4.txt")
-    start = np.array([0,-1,0,-2,0,1.57,0])
-    goal =  np.array([-1.9, 1.57 , 1.57, -2.07, -1.57, 1.57, 0.7])
+    #TEST 3
+    map_struct = loadmap("maps/map2.txt")
+    start =  np.array([0,0,0,-pi/2,0,pi/2,pi/4])
+    goal = np.array([0,1.5,-.5,0,0.5,0,0])
     # potential field planning
     q_path = planner.plan(deepcopy(map_struct), deepcopy(start), deepcopy(goal))
     
