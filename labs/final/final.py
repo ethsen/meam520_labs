@@ -4,6 +4,12 @@ from copy import deepcopy
 from math import pi
 
 import rospy
+
+#Necessary libraries for success
+from lib.calculateFK import FK
+from lib.IK_position_null import IK
+
+
 # Common interfaces for interacting with both the simulation and real environments!
 from core.interfaces import ArmController
 from core.interfaces import ObjectDetector
@@ -38,15 +44,25 @@ if __name__ == "__main__":
     print("Go!\n") # go!
 
     # STUDENT CODE HERE
+    fk = FK()
+    ik = IK()
+    neutralPos = np.array([0, 0, 0, -np.pi/2, 0, np.pi/2, np.pi/4])
+    arm.safe_move_to_position(neutralPos) # on your mark!
+    arm.exec_gripper_cmd(100)
+
+    jointPos, T0e = fk.forward(neutralPos)
 
     # get the transform from camera to panda_end_effector
-    start_position = np.array([0, 0, 0, -np.pi/2, 0, np.pi/2, np.pi/4])
-    arm.safe_move_to_position(start_position) # on your mark!
     H_ee_camera = detector.get_H_ee_camera()
 
     # Detect some blocks...
     for (name, pose) in detector.get_detections():
-         print(name,'\n',pose)
+        print(name,'\n',pose)
+        T0Block = T0e @ pose
+        target = ik.inverse(T0Block, neutralPos, 'J_pseudo', 0.3)
+        arm.safe_move_to_position(target)
+        arm.safe_move_to_position(neutralPos)
+
 
     # Uncomment to get middle camera depth/rgb images
     # mid_depth = detector.get_mid_depth()
