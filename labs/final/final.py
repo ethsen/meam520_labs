@@ -40,7 +40,7 @@ if __name__ == "__main__":
     # STUDENT CODE HERE
 
     # get the transform from camera to panda_end_effector
-    H_ee_camera = detector.get_H_ee_camera()
+    H_ee_camera = detector.get_H_ee_camera(self)
 
     # Detect some blocks...
     for (name, pose) in detector.get_detections():
