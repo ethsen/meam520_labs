@@ -245,7 +245,7 @@ class ObjectDetector:
 		output: 4x4 homogeneous transformation matrix
 		"""
 		try:
-			(trans,rot) = self.listener.lookupTransform('panda_EE', 'camera',rospy.Time(0))
+			(trans,rot) = self.listener.lookupTransform('panda_ee', 'camera',rospy.Time(0))
 			self.H_ee_camera = R.from_quat(rot).as_matrix()
 			self.H_ee_camera = np.append(self.H_ee_camera, np.array(trans).reshape(3,1), axis=1)
 			self.H_ee_camera = np.append(self.H_ee_camera, np.array([0,0,0,1]).reshape(1,4), axis=0)
