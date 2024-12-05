@@ -5,7 +5,7 @@ import rospy
 from core.interfaces import ArmController, ObjectDetector
 from lib.IK_position_null import IK
 from lib.calculateFK import FK
-
+from lib.finalAssist import FinalAssist
 if __name__ == "__main__":
     try:
         team = rospy.get_param("team")  # 'red' or 'blue'
@@ -16,10 +16,6 @@ if __name__ == "__main__":
     rospy.init_node("team_script")
     arm_controller = ArmController()
     object_detector = ObjectDetector()
-    inverse_kinematics = IK()
-    forward_kinematics = FK()
-
-    dropoff_position = np.array([0.56, 0.15, 0.24])
     initial_arm_position = np.array([0, 0, 0, -3.1415 / 2, 0, 3.1415 / 2, 3.1415 / 4])
     arm_controller.safe_move_to_position(initial_arm_position)  # On your mark!
 
@@ -32,15 +28,14 @@ if __name__ == "__main__":
     input("\nWaiting for start... Press ENTER to begin!\n")  # Get set!
     print("Go!\n")  # Go!
 
-    def detect_blocks():
-        detected_objects = object_detector.get_detections()
-        current_transform = forward_kinematics.forward(arm_controller.get_positions())[1]
-        camera_to_world_transform = current_transform @ object_detector.get_H_ee_camera()
-        return [camera_to_world_transform @ pose for _, pose in detected_objects]
+    fa = FinalAssist()
+    fa.start(arm_controller)
+    blockPoses = fa.detectBlocks(arm_controller, object_detector)
+    for pose in blockPoses:
+        fa.pickUp(pose)
+        
 
-    block_poses = detect_blocks()
-    arm_controller.open_gripper()
-
+    """
     for block_pose in block_poses:
         arm_controller.open_gripper()
         block_pose[2,3] += 0.225
@@ -77,3 +72,4 @@ if __name__ == "__main__":
         )
         print("Drop-off position reached")
         arm_controller.open_gripper()
+    """
