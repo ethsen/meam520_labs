@@ -20,7 +20,7 @@ class FinalAssist:
 
 
     @staticmethod
-    def detectBlocks(self, arm, detector):
+    def detectBlocks(arm, detector):
         """
         Block detection in order to find and transform 
         block's position into world frame.
