@@ -4,15 +4,15 @@ from scipy.linalg import null_space
 from time import perf_counter
 
 
-#from lib.calcJacobian import calcJacobian
-#from lib.calculateFK import FK
-#from lib.calcAngDiff import calcAngDiff
-#from lib.IK_velocity import IK_velocity  #optional
+from lib.calcJacobian import calcJacobian
+from lib.calculateFK import FK
+from lib.calcAngDiff import calcAngDiff
+from lib.IK_velocity import IK_velocity  #optional
 
-from calcJacobian import calcJacobian
-from calculateFK import FK
-from calcAngDiff import calcAngDiff
-from IK_velocity import IK_velocity
+#from calcJacobian import calcJacobian
+#from calculateFK import FK
+#from calcAngDiff import calcAngDiff
+#from IK_velocity import IK_velocity
 
 class IK:
 
