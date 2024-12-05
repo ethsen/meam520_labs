@@ -17,8 +17,6 @@ class FinalAssist:
         neutralPos = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
         arm.safe_move_to_position(neutralPos)
 
-
-
     @staticmethod
     def detectBlocks(arm, detector):
         """
@@ -34,6 +32,7 @@ class FinalAssist:
         """
 
         blocks = detector.get_detections()
+        print(arm.get_positions())
         currT0e = FK.forward(arm.get_positions())[1]
         cameraToWorld = currT0e @ detector.get_H_ee_camera()
         return [cameraToWorld @ pose for _,pose in blocks]
