@@ -5,20 +5,20 @@ from math import pi
 
 class FinalAssist:
     def __init__(self) :
+        self.ik = IK()
+        self.fk =FK()
         self.dropT = np.array([[1,0,0,0.56],
                                    [0,1,0,0.15],
                                    [0,0,0,0.24],
                                    [0,0,0,1]])
-    @staticmethod
-    def start(arm):
+        self.neutralPoS = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
+    def start(self,arm):
         """
         Sets the arm in the neutral position
         """
-        neutralPos = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
-        arm.safe_move_to_position(neutralPos)
+        arm.safe_move_to_position(self.neutralPoS)
 
-    @staticmethod
-    def detectBlocks(arm, detector):
+    def detectBlocks(self, arm, detector):
         """
         Block detection in order to find and transform 
         block's position into world frame.
@@ -30,15 +30,13 @@ class FinalAssist:
         OUTPUTS:
         poses - Array of poses for each block in world frame
         """
-
+        
         blocks = detector.get_detections()
-        print(arm.get_positions())
-        currT0e = FK.forward(arm.get_positions())[1]
+        currT0e = self.fk.forward(arm.get_positions())[1]
         cameraToWorld = currT0e @ detector.get_H_ee_camera()
         return [cameraToWorld @ pose for _,pose in blocks]
     
-    @staticmethod
-    def getJointConfig(transformation):
+    def getJointConfig(self,transformation):
         """
         Uses IK class to find and return the joint configuration
         for block pose
@@ -53,7 +51,7 @@ class FinalAssist:
         neutralPos = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
         
         
-        jointConfig,_,success,_ =   IK.inverse(transformation,neutralPos, 'J_pseudo', 0.3)
+        jointConfig,_,success,_ = self.ik.inverse(transformation,neutralPos, 'J_pseudo', 0.3)
 
         if success:
             return jointConfig
@@ -71,15 +69,14 @@ class FinalAssist:
         jointConfig - 1x7 array of the joint configurations
         """
         neutralPos = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
-        jointConfig,_,success,_ =   IK.inverse(self.dropT,neutralPos, 'J_pseudo', 0.3)
+        jointConfig,_,success,_ =   self.ik.inverse(self.dropT,neutralPos, 'J_pseudo', 0.3)
 
         if success:
             return jointConfig
         else:
             return neutralPos
 
-    @staticmethod
-    def pickUp(arm, blockPose):
+    def pickUp(self, arm, blockPose):
         """
         Pickup function for static blocks. The arm
         positions itself above the block and then lowers down
@@ -96,10 +93,10 @@ class FinalAssist:
         arm.open_gripper()
         overBlockPose = np.copy(blockPose)
         overBlockPose[2,3] += 0.225
-        jointConfig = FinalAssist.getJointPos(overBlockPose)
+        jointConfig = self.getJointPos(overBlockPose)
         arm.safe_move_to_position(jointConfig)
 
-        jointConfig = FinalAssist.getJointPos(blockPose)
+        jointConfig = self.getJointPos(blockPose)
         arm.safe_move_to_position(jointConfig)
         arm.exec_gripper_cmd(0.03,60)
 
