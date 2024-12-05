@@ -93,10 +93,10 @@ class FinalAssist:
         arm.open_gripper()
         overBlockPose = np.copy(blockPose)
         overBlockPose[2,3] += 0.225
-        jointConfig = self.getJointPos(overBlockPose)
+        jointConfig = self.getJointConfig(overBlockPose)
         arm.safe_move_to_position(jointConfig)
 
-        jointConfig = self.getJointPos(blockPose)
+        jointConfig = self.getJointConfig(blockPose)
         arm.safe_move_to_position(jointConfig)
         arm.exec_gripper_cmd(0.03,60)
 
