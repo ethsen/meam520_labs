@@ -11,12 +11,12 @@ class FinalAssist:
                                    [0,1,0,0.15],
                                    [0,0,0,0.24],
                                    [0,0,0,1]])
-        self.neutralPoS = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
+        self.neutralPos = np.array([-pi/4,0,0,-pi/2,0,pi/2,pi/4])
     def start(self,arm):
         """
         Sets the arm in the neutral position
         """
-        arm.safe_move_to_position(self.neutralPoS)
+        arm.safe_move_to_position(self.neutralPos)
 
     def detectBlocks(self, arm, detector):
         """
@@ -68,13 +68,12 @@ class FinalAssist:
         OUTPUTS:
         jointConfig - 1x7 array of the joint configurations
         """
-        neutralPos = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
-        jointConfig,_,success,_ =   self.ik.inverse(self.dropT,neutralPos, 'J_pseudo', 0.3)
+        jointConfig,_,success,_ =   self.ik.inverse(self.dropT,self.neutralPos, 'J_pseudo', 0.3)
 
         if success:
             return jointConfig
         else:
-            return neutralPos
+            return self.neutralPos
 
     def pickUp(self, arm, blockPose):
         """
@@ -89,7 +88,6 @@ class FinalAssist:
         OUTPUTS:
         success - Boolean representing if pickup was successful or not
         """
-        neutralPos = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
         arm.open_gripper()
         overBlockPose = np.copy(blockPose)
         overBlockPose[2,3] += 0.225
@@ -100,5 +98,5 @@ class FinalAssist:
         arm.safe_move_to_position(jointConfig)
         arm.exec_gripper_cmd(0.03,60)
 
-        arm.safe_move_to_position(neutralPos)
+        arm.safe_move_to_position(self.neutralPos)
         
