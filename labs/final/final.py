@@ -32,8 +32,8 @@ if __name__ == "__main__":
     fa.start(arm_controller)
     blockPoses = fa.detectBlocks(arm_controller, object_detector)
     for pose in blockPoses:
-        fa.pickUp(pose)
-        
+        fa.pickUp(arm_controller,pose)
+
 
     """
     for block_pose in block_poses:
