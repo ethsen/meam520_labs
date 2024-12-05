@@ -11,7 +11,7 @@ class FinalAssist:
                                    [0,1,0,0.15],
                                    [0,0,0,0.24],
                                    [0,0,0,1]])
-        self.neutralPos = np.array([-pi/4,0,0,-pi/2,0,pi/2,pi/4])
+        self.neutralPos = np.array([-pi/8,0,0,-pi/2,0,pi/2,pi/4])
     def start(self,arm):
         """
         Sets the arm in the neutral position
