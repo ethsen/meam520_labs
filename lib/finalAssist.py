@@ -116,7 +116,7 @@ class FinalAssist:
         #blockPose[:3,:3] = orientation
         blockPose[:3,2] = np.array([0,0,-1])
         print("Gripping Block: ",np.round(blockPose,4))
-        jointConfig = self.getJointConfig(blockPose,bestGuess)
+        jointConfig = self.getJointConfig(blockPose)
         print("Picking up block...")
         print(jointConfig)
         input("test")            
