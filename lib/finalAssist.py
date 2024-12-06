@@ -33,20 +33,26 @@ class FinalAssist:
         OUTPUTS:
         poses - Array of poses for each block in world frame
         """
-        
-        blocks = self.detector.get_detections()
+        invalidBlocks = True
         currT0e = self.fk.forward(self.arm.get_positions())[1]
         print("currT0e: ", np.round(currT0e))
-        input("Wait")
+
         cameraToWorld = currT0e @ self.detector.get_H_ee_camera()
         print("Cam2World: ",np.round(cameraToWorld))
-        input("Wait")
-        poses = []
-        for _,pose in blocks:
-            pose = cameraToWorld @ pose
-            print("Pose: ",np.round(pose,4))
-            poses.append(pose)
-        return [cameraToWorld @ pose for _,pose in blocks]
+        while invalidBlocks:
+            blocks = self.detector.get_detections()
+
+            poses = []
+            for _,pose in blocks:
+                print("Pose: ",np.round(pose,4))
+                input("wait")
+                pose = cameraToWorld @ pose
+                print("Pose: ",np.round(pose,4))
+                input("wait")
+                poses.append(pose)
+
+            invalidBlocks = False
+        return poses
     
     def getJointConfig(self,transformation):
         """
@@ -132,6 +138,7 @@ class FinalAssist:
         orientation - 3x3 array of rotation matrix
         with respect to world frame
         """
+        blockPose[0,3] -= 0.075
         blockPose[2,3] += 0.075
         jointConfig = self.getJointConfig(blockPose)
         self.arm.safe_move_to_position(jointConfig)
