@@ -74,8 +74,12 @@ class FinalAssist:
         jointConfig,_,success,_ = self.ik.inverse(transformation,guess, 'J_pseudo', 0.3)
 
         if success:
+            print("Success solution found")
+            
             return jointConfig
         else:
+            print("Success solution found")
+
             return self.neutralPos
 
     def getDropoffPos(self):
@@ -91,7 +95,6 @@ class FinalAssist:
         jointConfig,_,success,_ =   self.ik.inverse(self.dropT,self.neutralPos, 'J_pseudo', 0.3)
 
         if success:
-            print("Success solution found")
             return jointConfig
         else:
             print("Unsuccessful")
