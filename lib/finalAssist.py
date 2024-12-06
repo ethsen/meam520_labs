@@ -91,8 +91,11 @@ class FinalAssist:
         jointConfig,_,success,_ =   self.ik.inverse(self.dropT,self.neutralPos, 'J_pseudo', 0.3)
 
         if success:
+            print("Success solution found")
             return jointConfig
         else:
+            print("Unsuccessful")
+
             return self.neutralPos
 
     def pickUp(self, blockPose):
