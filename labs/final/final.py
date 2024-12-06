@@ -28,9 +28,9 @@ if __name__ == "__main__":
     input("\nWaiting for start... Press ENTER to begin!\n")  # Get set!
     print("Go!\n")  # Go!
 
-    fa = FinalAssist()
-    fa.start(arm_controller)
-    blockPoses = fa.detectBlocks(arm_controller, object_detector)
+    fa = FinalAssist(arm_controller,object_detector)
+    fa.start()
+    blockPoses = fa.detectBlocks()
     for pose in blockPoses:
         print(pose)
         fa.pickUp(arm_controller,pose)
