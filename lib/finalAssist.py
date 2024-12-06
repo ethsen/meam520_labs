@@ -114,7 +114,7 @@ class FinalAssist:
         self.arm.open_gripper()
         blockPose, bestGuess = self.approach(blockPose)
         #blockPose[:3,:3] = orientation
-        #blockPose[:3,2] = np.array([0,0,-1])
+        blockPose[:3,2] = np.array([0,0,-1])
         print("Gripping Block: ",np.round(blockPose,4))
         jointConfig = self.getJointConfig(blockPose,bestGuess)
         print("Picking up block...")
