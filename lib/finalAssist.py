@@ -117,6 +117,7 @@ class FinalAssist:
         self.arm.safe_move_to_position(jointConfig)
 
         blockPose[:3,:3] = self.approach(blockPose)
+        blockPose[:3,2] = np.array([0,0,-1])
 
         jointConfig = self.getJointConfig(blockPose)
         self.arm.safe_move_to_position(jointConfig)
@@ -138,16 +139,18 @@ class FinalAssist:
         orientation - 3x3 array of rotation matrix
         with respect to world frame
         """
-        blockPose[0,3] -= 0.05
+        blockPose[0,3] -= 0.025
         blockPose[2,3] += 0.075
         jointConfig = self.getJointConfig(blockPose)
         self.arm.safe_move_to_position(jointConfig)
         blocks = self.detectBlocks()
-        for pose in blocks:
-            pose = pose[:3,:3]
+        while len(blocks) > 1:
+            blocks = self.detectBlocks()
+            pose = blocks[:3,:3]
             print("Updated Pose: ", pose)
+        pose = blocks[:3,:3]
         
-        return blocks
+        return pose
         
 
 """
