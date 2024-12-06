@@ -142,7 +142,7 @@ class FinalAssist:
         while len(blocks) > 1:
             blocks = self.detectBlocks()
         print(blocks)
-        orientation = blocks[:3,:3]
+        orientation = blocks[0][:3,:3]
         print("Updated Pose: ", orientation)
 
         return orientation
