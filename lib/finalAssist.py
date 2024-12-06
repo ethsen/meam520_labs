@@ -48,15 +48,14 @@ class FinalAssist:
         OUTPUTS:
         jointConfig - 1x7 array of the joint configurations
         """
-        neutralPos = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
         
         
-        jointConfig,_,success,_ = self.ik.inverse(transformation,neutralPos, 'J_pseudo', 0.3)
+        jointConfig,_,success,_ = self.ik.inverse(transformation,self.neutralPos, 'J_pseudo', 0.3)
 
         if success:
             return jointConfig
         else:
-            return neutralPos
+            return self.neutralPos
 
     def getDropoffPos(self):
         """
@@ -88,9 +87,12 @@ class FinalAssist:
         OUTPUTS:
         success - Boolean representing if pickup was successful or not
         """
+        blockPose = np.array([[1,0,0,blockPose[0,3]],
+                                [0,-1,0,blockPose[1,3]],
+                                [0,0,-1,blockPose[2,3]],
+                                [0,0,0,1]])
         arm.open_gripper()
         overBlockPose = np.copy(blockPose)
-        print(blockPose)
         overBlockPose[2,3] += 0.225
         jointConfig = self.getJointConfig(overBlockPose)
         arm.safe_move_to_position(jointConfig)
