@@ -111,11 +111,6 @@ class FinalAssist:
                                 [0,0,-1,blockPose[2,3]],
                                 [0,0,0,1]])
         self.arm.open_gripper()
-        overBlockPose = np.copy(blockPose)
-        overBlockPose[2,3] += 0.225
-        jointConfig = self.getJointConfig(overBlockPose)
-        self.arm.safe_move_to_position(jointConfig)
-
         blockPose[:3,:3] = self.approach(blockPose)
         blockPose[:3,2] = np.array([0,0,-1])
 
@@ -146,11 +141,11 @@ class FinalAssist:
         blocks = self.detectBlocks()
         while len(blocks) > 1:
             blocks = self.detectBlocks()
-            pose = blocks[:3,:3]
-            print("Updated Pose: ", pose)
-        pose = blocks[:3,:3]
-        
-        return pose
+        print(blocks)
+        orientation = blocks[:3,:3]
+        print("Updated Pose: ", orientation)
+
+        return orientation
         
 
 """
