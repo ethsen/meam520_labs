@@ -70,7 +70,7 @@ class FinalAssist:
             
             return jointConfig
         else:
-            print("Success solution found")
+            print("No solution found")
 
             return self.neutralPos
 
