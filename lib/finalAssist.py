@@ -33,7 +33,15 @@ class FinalAssist:
         
         blocks = detector.get_detections()
         currT0e = self.fk.forward(arm.get_positions())[1]
+        print("currT0e: ", np.round(currT0e))
+        input("Wait")
         cameraToWorld = currT0e @ detector.get_H_ee_camera()
+        print("Cam2World: ",np.round(cameraToWorld))
+        input("Wait")
+        poses = []
+        for _,pose in blocks:
+            pose = cameraToWorld @ pose
+            poses.append(pose)
         return [cameraToWorld @ pose for _,pose in blocks]
     
     def getJointConfig(self,transformation):
