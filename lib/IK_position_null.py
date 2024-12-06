@@ -17,8 +17,12 @@ from lib.IK_velocity import IK_velocity  #optional
 class IK:
 
     # JOINT LIMITS
-    lower = np.array([-2.8973,-1.7628,-2.8973,-3.0718,-2.8973,-0.0175,-2.8973])
-    upper = np.array([2.8973,1.7628,2.8973,-0.0698,2.8973,3.7525,2.8973])  
+    #lower = np.array([-2.8973,-1.7628,-2.8973,-3.0718,-2.8973,-0.0175,-2.8973])
+    #upper = np.array([2.8973,1.7628,2.8973,-0.0698,2.8973,3.7525,2.8973])
+
+    # JOINT LIMITS
+    lower = np.array([-2.8973,-1.7628,-2.8973,-3.0718,-2.8973,-0.0001,pi/4.001])
+    upper = np.array([2.8973,1.7628,2.8973,-0.0698,2.897, 0.0001,pi/4])  
     center = lower + (upper - lower) / 2 # compute middle of range of motion of each joint
     fk = FK()
 

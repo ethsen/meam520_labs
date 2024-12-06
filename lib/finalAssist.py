@@ -90,6 +90,7 @@ class FinalAssist:
         """
         arm.open_gripper()
         overBlockPose = np.copy(blockPose)
+        print(blockPose)
         overBlockPose[2,3] += 0.225
         jointConfig = self.getJointConfig(overBlockPose)
         arm.safe_move_to_position(jointConfig)
@@ -100,3 +101,9 @@ class FinalAssist:
 
         arm.safe_move_to_position(self.neutralPos)
         
+
+"""
+Position camera over the pick up area, detect blocks,
+Transform their orientation and center position into the world
+frame, pick up, place, reset over the neutral position.
+"""
