@@ -11,7 +11,7 @@ class FinalAssist:
         self.detector = detector
         self.dropT = np.array([[1,0,0,0.56],
                                    [0,1,0,0.15],
-                                   [0,0,0,0.24],
+                                   [0,0,-1,0.24],
                                    [0,0,0,1]])
         self.neutralPos = np.array([-pi/8,0,0,-pi/2,0,pi/2,pi/4])
 
@@ -35,20 +35,20 @@ class FinalAssist:
         """
         invalidBlocks = True
         currT0e = self.fk.forward(self.arm.get_positions())[1]
-        print("currT0e: ", np.round(currT0e))
+        #print("currT0e: ", np.round(currT0e))
 
         cameraToWorld = currT0e @ self.detector.get_H_ee_camera()
-        print("Cam2World: ",np.round(cameraToWorld))
+        #print("Cam2World: ",np.round(cameraToWorld))
         while invalidBlocks:
             blocks = self.detector.get_detections()
 
             poses = []
             for _,pose in blocks:
-                print("Pose: ",np.round(pose,4))
-                input("wait")
+                #print("Pose: ",np.round(pose,4))
+                #input("wait")
                 pose = cameraToWorld @ pose
-                print("Pose: ",np.round(pose,4))
-                input("wait")
+                #print("Pose: ",np.round(pose,4))
+                #input("wait")
                 poses.append(pose)
 
             invalidBlocks = False
@@ -113,8 +113,8 @@ class FinalAssist:
         self.arm.open_gripper()
         blockPose[:3,:3] = self.approach(blockPose)
         blockPose[:3,2] = np.array([0,0,-1])
-
         jointConfig = self.getJointConfig(blockPose)
+        print("Picking up block...")
         self.arm.safe_move_to_position(jointConfig)
         self.arm.exec_gripper_cmd(0.03,60)
 
@@ -134,6 +134,7 @@ class FinalAssist:
         orientation - 3x3 array of rotation matrix
         with respect to world frame
         """
+        print("Approaching Block...")
         blockPose[0,3] -= 0.025
         blockPose[2,3] += 0.075
         jointConfig = self.getJointConfig(blockPose)
@@ -141,9 +142,8 @@ class FinalAssist:
         blocks = self.detectBlocks()
         while len(blocks) > 1:
             blocks = self.detectBlocks()
-        print(blocks)
         orientation = blocks[0][:3,:3]
-        print("Updated Pose: ", orientation)
+        #print("Updated Pose: ", orientation)
 
         return orientation
         
