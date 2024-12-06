@@ -63,15 +63,14 @@ class FinalAssist:
         """
         
         
-        jointConfig,_,success,_ = self.ik.inverse(transformation,guess, 'J_pseudo', 0.3)
+        jointConfig,_,success,message = self.ik.inverse(transformation,guess, 'J_pseudo', 0.3)
 
         if success:
-            print("Success solution found")
+            print(message)
             
             return jointConfig
         else:
-            print("No solution found")
-
+            print(message)
             return self.neutralPos
 
     def getDropoffPos(self):
@@ -84,12 +83,12 @@ class FinalAssist:
         OUTPUTS:
         jointConfig - 1x7 array of the joint configurations
         """
-        jointConfig,_,success,_ =   self.ik.inverse(self.dropT,self.neutralPos, 'J_pseudo', 0.3)
+        jointConfig,_,success,message =   self.ik.inverse(self.dropT,self.neutralPos, 'J_pseudo', 0.3)
 
         if success:
             return jointConfig
         else:
-            print("Unsuccessful")
+            print(message)
 
             return self.neutralPos
 
