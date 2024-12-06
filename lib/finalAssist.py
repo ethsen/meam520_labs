@@ -136,7 +136,7 @@ class FinalAssist:
         jointConfig = self.getJointConfig(blockPose)
         self.arm.safe_move_to_position(jointConfig)
         blocks = self.detectBlocks()
-        for pose in blocks:
+        for _,pose in blocks:
             pose = pose[:3,:3]
             print("Updated Pose: ", pose)
         
