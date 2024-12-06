@@ -87,6 +87,7 @@ class FinalAssist:
         OUTPUTS:
         success - Boolean representing if pickup was successful or not
         """
+        print(np.round(blockPose,4))
         blockPose = np.array([[1,0,0,blockPose[0,3]],
                                 [0,-1,0,blockPose[1,3]],
                                 [0,0,-1,blockPose[2,3]],
