@@ -46,7 +46,9 @@ class FinalAssist:
             for _,pose in blocks:
                 #print("Pose: ",np.round(pose,4))
                 #input("wait")
+                orientation = pose[:3,:3] * -1
                 pose = cameraToWorld @ pose
+                pose[:3,:3] = orientation
                 #print("Pose: ",np.round(pose,4))
                 #input("wait")
                 poses.append(pose)
@@ -54,7 +56,7 @@ class FinalAssist:
             invalidBlocks = False
         return poses
     
-    def getJointConfig(self,transformation):
+    def getJointConfig(self,transformation, guess = np.array([-pi/8,0,0,-pi/2,0,pi/2,pi/4])):
         """
         Uses IK class to find and return the joint configuration
         for block pose
@@ -62,13 +64,14 @@ class FinalAssist:
         INPUTS:
         transformation - 4x4 transformation matrix of a desired 
         position in the world frame
+        guess - best guess for inverse solver to use
 
         OUTPUTS:
         jointConfig - 1x7 array of the joint configurations
         """
         
         
-        jointConfig,_,success,_ = self.ik.inverse(transformation,self.neutralPos, 'J_pseudo', 0.3)
+        jointConfig,_,success,_ = self.ik.inverse(transformation,guess, 'J_pseudo', 0.3)
 
         if success:
             return jointConfig
@@ -111,14 +114,17 @@ class FinalAssist:
                                 [0,0,-1,blockPose[2,3]],
                                 [0,0,0,1]])
         self.arm.open_gripper()
-        blockPose[:3,:3] = self.approach(blockPose)
+        orientation, bestGuess = self.approach(blockPose)
+        blockPose[:3,:3] = orientation
         blockPose[:3,2] = np.array([0,0,-1])
-        jointConfig = self.getJointConfig(blockPose)
+        print("Gripping Block: ", blockPose)
+        jointConfig = self.getJointConfig(blockPose,bestGuess)
         print("Picking up block...")
+        input("test")
         self.arm.safe_move_to_position(jointConfig)
         self.arm.exec_gripper_cmd(0.03,60)
 
-        self.arm.safe_move_to_position(self.neutralPos)
+        #self.arm.safe_move_to_position(self.neutralPos)
 
     def approach(self, blockPose):
         """
@@ -133,6 +139,8 @@ class FinalAssist:
         OUPUTS:
         orientation - 3x3 array of rotation matrix
         with respect to world frame
+        jointConfig - 1x7 array of joint configuration 
+        right above the block
         """
         print("Approaching Block...")
         blockPose[0,3] -= 0.025
@@ -140,12 +148,10 @@ class FinalAssist:
         jointConfig = self.getJointConfig(blockPose)
         self.arm.safe_move_to_position(jointConfig)
         blocks = self.detectBlocks()
-        while len(blocks) > 1:
-            blocks = self.detectBlocks()
-        orientation = blocks[0][:3,:3]
-        #print("Updated Pose: ", orientation)
+        orientation = blocks[0][:3,:3]*-1
+        print("Updated Pose: ", orientation)
 
-        return orientation
+        return orientation, jointConfig
         
 
 """

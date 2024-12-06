@@ -32,7 +32,6 @@ if __name__ == "__main__":
     fa.start()
     blockPoses = fa.detectBlocks()
     for pose in blockPoses:
-        print(pose)
         fa.pickUp(pose)
 
 
