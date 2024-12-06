@@ -106,16 +106,16 @@ class FinalAssist:
         OUTPUTS:
         success - Boolean representing if pickup was successful or not
         """
-        #print(np.round(blockPose,4))
         blockPose = np.array([[1,0,0,blockPose[0,3]],
                                 [0,-1,0,blockPose[1,3]],
                                 [0,0,-1,blockPose[2,3]],
                                 [0,0,0,1]])
+        print("Gripping initially: ", np.round(blockPose,4))
         self.arm.open_gripper()
         orientation, bestGuess = self.approach(blockPose)
         blockPose[:3,:3] = orientation
         blockPose[:3,2] = np.array([0,0,-1])
-        print("Gripping Block: ", blockPose)
+        print("Gripping Block: ",np.round(blockPose,4))
         jointConfig = self.getJointConfig(blockPose,bestGuess)
         print("Picking up block...")
         input("test")
@@ -147,7 +147,7 @@ class FinalAssist:
         self.arm.safe_move_to_position(jointConfig)
         blocks = self.detectBlocks()
         orientation = blocks[0][:3,:3]*-1
-        print("Updated Pose: ", orientation)
+        #print("Updated Pose: ", np.round(orientation,4))
 
         return orientation, jointConfig
         
