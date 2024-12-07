@@ -14,6 +14,12 @@ class FinalAssist:
                                    [0,0,-1,0.24],
                                    [0,0,0,1]])
         self.neutralPos = np.array([-pi/8,0,0,-pi/2,0,pi/2,pi/4])
+        self.neutralDrop = np.array([pi/8,0,0,-pi/2,0,pi/2,pi/4])
+        self.dropOffPos = self.ik.inverse(np.array([[1,0,0,0.56],
+                                    [0,1,0,0.15],
+                                    [0,0,-1,0.24],
+                                    [0,0,0,1]]),self.neutralDrop, 'J_pseudo', 0.3)
+        self.placedBlocks = 0
 
     def start(self):
         """
@@ -41,9 +47,9 @@ class FinalAssist:
         blocks = self.detector.get_detections()
         poses = []
         for _,pose in blocks:
-            print("Pose in camera frame: ",np.round(pose,4))
+            #print("Pose in camera frame: ",np.round(pose,4))
             pose = cameraToWorld @ pose
-            print("Pose in world frame: ",np.round(pose,4))
+            #print("Pose in world frame: ",np.round(pose,4))
             poses.append(pose)
 
         return poses
@@ -99,7 +105,6 @@ class FinalAssist:
         to pick it up.
 
         INPUTS:
-        arm - Arm controller object
         blockPose - 4x4 pose of block in world frame
 
         OUTPUTS:
@@ -115,7 +120,6 @@ class FinalAssist:
         print("Picking up block...")
         self.arm.safe_move_to_position(jointConfig)
         self.arm.exec_gripper_cmd(0.03,60)
-
         self.arm.safe_move_to_position(self.neutralPos)
 
     def approach(self, blockPose):
@@ -143,7 +147,7 @@ class FinalAssist:
         blockPose[2,3] += 0.075
         
         jointConfig = self.getJointConfig(blockPose)
-        print("Joint Config: ", jointConfig)
+        #print("Joint Config: ", jointConfig)
         self.arm.safe_move_to_position(jointConfig)
         pose = self.detectBlocks()[0]
         #print("Updated Pose: ", np.round(orientation,4))
@@ -156,12 +160,26 @@ class FinalAssist:
                                 [0,0,-1,0],
                                 [0,0,0,1]])
         
-        print(np.round(pose,4))
         
         return pose, jointConfig
+    
+    def dropOff(self):
+        """
+        Drop off function. The arm first places itself above
+        the drop off point and then lowers the block to its
+        final position.
+        """
+        
+        self.arm.safe_move_to_position(self.neutralDrop)
+        self.arm.safe_move_to_position(self.dropOffPos)
+        self.arm.open_gripper()
+        self.dropOffPos[2,3] += 0.05
+
+
         
 
 """
+
 Position camera over the pick up area, detect blocks,
 Transform their orientation and center position into the world
 frame, pick up, place, reset over the neutral position.
