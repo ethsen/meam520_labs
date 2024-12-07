@@ -105,7 +105,8 @@ class FinalAssist:
         OUTPUTS:
         success - Boolean representing if pickup was successful or not
         """
-        
+        self.arm.open_gripper()
+
         blockPose, bestGuess = self.approach(blockPose)
         
         jointConfig = self.getJointConfig(blockPose, bestGuess)
