@@ -307,6 +307,19 @@ class IK:
 
             print("Success Rate: ", (successCount/50))
         
+    @staticmethod
+    def singleTest():
+        seed = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
+        target = np.array([[-0.999,0.0436,0,0.5098],
+                           [0.0436, -0.999,0, -0.2415],
+                           [0,0,1,0.2254],
+                           [0,0,0,1]])
+        q, rollout, success, message = ik.inverse(target, seed, 'J_pseudo', 0.3)  #try both methods
+
+        print(message)
+
+
+
 
 ################################
 ## Simple Testing Environment ##
@@ -321,7 +334,7 @@ if __name__ == "__main__":
     ik = IK()
     # matches figure in the handout
     #seed = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
-    ik.test()
+    ik.singleTest()
 
     """
     #Testing for best Alpha
