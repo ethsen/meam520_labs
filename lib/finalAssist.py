@@ -105,13 +105,27 @@ class FinalAssist:
         OUTPUTS:
         success - Boolean representing if pickup was successful or not
         """
-        blockPose, bestGuess = self.approach(blockPose)
-        jointConfig = self.getJointConfig(blockPose, bestGuess)
+        blockPose = blockPose @ np.array([[1,0,0,0],
+                                     [0,-1,0,0],
+                                     [0,0,-1,0],
+                                     [0,0,0,1]])
+        self.arm.open_gripper()
+        blockPose[0,3] -= 0.025
+        blockPose[2,3] += 0.1
+        jointConfig = self.getJointConfig(blockPose)
+
+        #blockPose, bestGuess = self.approach(blockPose)
+        
+        #jointConfig = self.getJointConfig(blockPose, bestGuess)
+        self.arm.safe_move_to_position(jointConfig)
+        blockPose[0,3] += 0.025
+        blockPose[2,3] -= 0.1
+        jointConfig = self.getJointConfig(blockPose, jointConfig)
         print("Picking up block...")
         self.arm.safe_move_to_position(jointConfig)
         self.arm.exec_gripper_cmd(0.03,60)
 
-        #self.arm.safe_move_to_position(self.neutralPos)
+        self.arm.safe_move_to_position(self.neutralPos)
 
     def approach(self, blockPose):
         """
@@ -137,6 +151,7 @@ class FinalAssist:
         self.arm.open_gripper()
         blockPose[0,3] -= 0.025
         blockPose[2,3] += 0.075
+        
         jointConfig = self.getJointConfig(blockPose)
         print("Joint Config: ", jointConfig)
         self.arm.safe_move_to_position(jointConfig)
@@ -146,6 +161,10 @@ class FinalAssist:
                                      [0,-1,0,0],
                                      [0,0,-1,0],
                                      [0,0,0,1]])
+        
+        blockPose[2,3] += 0.1
+        jointConfig = self.getJointConfig(blockPose)
+        self.arm.safe_move_to_position(jointConfig)
         return pose, jointConfig
         
 
