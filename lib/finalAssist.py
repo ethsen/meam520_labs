@@ -142,8 +142,11 @@ class FinalAssist:
         self.arm.safe_move_to_position(jointConfig)
         blocks = self.detectBlocks()
         #print("Updated Pose: ", np.round(orientation,4))
-
-        return blocks[0], jointConfig
+        pose = blocks[0] @ np.array([[1,0,0,0],
+                                     [0,-1,0,0],
+                                     [0,0,-1,0],
+                                     [0,0,0,1]])
+        return pose, jointConfig
         
 
 """
