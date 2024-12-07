@@ -156,6 +156,8 @@ class FinalAssist:
                                 [0,0,-1,0],
                                 [0,0,0,1]])
         
+        print(np.round(pose,4))
+        
         return pose, jointConfig
         
 
