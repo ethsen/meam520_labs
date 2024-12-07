@@ -149,7 +149,7 @@ class FinalAssist:
         #print("Updated Pose: ", np.round(orientation,4))
         angle = np.arccos((np.trace(pose) -1)/2)
         pose[:3,:3] = np.array([[np.cos(angle),-np.sin(angle),0],
-                                [np.cos(angle),np.cos(angle),0],
+                                [np.sin(angle),np.cos(angle),0],
                                 [0,0,1]])
         pose = pose @ np.array([[1,0,0,0],
                                 [0,-1,0,0],
