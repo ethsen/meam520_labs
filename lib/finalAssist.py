@@ -145,12 +145,12 @@ class FinalAssist:
         jointConfig = self.getJointConfig(blockPose)
         print("Joint Config: ", jointConfig)
         self.arm.safe_move_to_position(jointConfig)
-        blocks = self.detectBlocks()
+        pose = self.detectBlocks()[0]
         #print("Updated Pose: ", np.round(orientation,4))
-        pose = blocks[0] @ np.array([[1,0,0,0],
-                                     [0,-1,0,0],
-                                     [0,0,-1,0],
-                                     [0,0,0,1]])
+        angle = np.arccos((np.trace(pose) -1)/2)
+        pose[:3,:3] = np.array([[np.cos(angle),-np.sin(angle),0],
+                                [np.cos(angle),np.cos(angle),0],
+                                [0,0,-1]])
         
         
         return pose, jointConfig
