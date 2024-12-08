@@ -151,7 +151,7 @@ class FinalAssist:
         self.arm.safe_move_to_position(jointConfig)
         pose = self.detectBlocks()[0]
         #print("Updated Pose: ", np.round(orientation,4))
-        angle = np.arccos((np.trace(pose) -1)/2) - pi/4
+        angle = np.arccos((np.trace(pose) -1)/2) - pi/2
         pose[:3,:3] = np.array([[np.cos(angle),-np.sin(angle),0],
                                 [np.sin(angle),np.cos(angle),0],
                                 [0,0,1]])
