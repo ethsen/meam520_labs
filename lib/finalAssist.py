@@ -15,10 +15,10 @@ class FinalAssist:
                                    [0,0,0,1]])
         self.neutralPos = np.array([-pi/8,0,0,-pi/2,0,pi/2,pi/4])
         self.neutralDrop = np.array([pi/8,0,0,-pi/2,0,pi/2,pi/4])
-        self.dropOffPos = self.ik.inverse(np.array([[1,0,0,0.56],
+        self.dropOffPos = np.array([[1,0,0,0.56],
                                     [0,1,0,0.15],
                                     [0,0,-1,0.24],
-                                    [0,0,0,1]]),self.neutralDrop, 'J_pseudo', 0.3)[0]
+                                    [0,0,0,1]])
         self.placedBlocks = 0
 
     def start(self):
@@ -120,7 +120,7 @@ class FinalAssist:
         print("Picking up block...")
         self.arm.safe_move_to_position(jointConfig)
         self.arm.exec_gripper_cmd(0.03,60)
-        self.arm.safe_move_to_position(self.neutralPos)
+        self.arm.safe_move_to_position(bestGuess)
 
     def approach(self, blockPose):
         """
@@ -169,10 +169,11 @@ class FinalAssist:
         the drop off point and then lowers the block to its
         final position.
         """
-        print(self.dropOffPos)
+        drop = self.ik.inverse(self.dropOffPos,self.neutralDrop, 'J_pseudo', 0.3)[0]
         self.arm.safe_move_to_position(self.neutralDrop)
-        self.arm.safe_move_to_position(self.dropOffPos)
+        self.arm.safe_move_to_position(drop)
         self.arm.open_gripper()
+        self.arm.safe_move_to_position(self.neutralDrop)
         self.dropOffPos[2,3] += 0.05
 
 
