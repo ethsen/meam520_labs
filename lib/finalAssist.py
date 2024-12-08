@@ -18,7 +18,7 @@ class FinalAssist:
         self.dropOffPos = self.ik.inverse(np.array([[1,0,0,0.56],
                                     [0,1,0,0.15],
                                     [0,0,-1,0.24],
-                                    [0,0,0,1]]),self.neutralDrop, 'J_pseudo', 0.3)
+                                    [0,0,0,1]]),self.neutralDrop, 'J_pseudo', 0.3)[0]
         self.placedBlocks = 0
 
     def start(self):
