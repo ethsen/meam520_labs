@@ -169,7 +169,7 @@ class FinalAssist:
         the drop off point and then lowers the block to its
         final position.
         """
-        
+        print(self.dropOffPos)
         self.arm.safe_move_to_position(self.neutralDrop)
         self.arm.safe_move_to_position(self.dropOffPos)
         self.arm.open_gripper()
