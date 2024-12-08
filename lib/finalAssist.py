@@ -9,17 +9,12 @@ class FinalAssist:
         self.fk =FK()
         self.arm = arm
         self.detector = detector
-        self.dropT = np.array([[1,0,0,0.56],
-                                   [0,1,0,0.15],
-                                   [0,0,-1,0.24],
-                                   [0,0,0,1]])
         self.neutralPos = np.array([-pi/8,0,0,-pi/2,0,pi/2,pi/4])
         self.neutralDrop = np.array([pi/8,0,0,-pi/2,0,pi/2,pi/4])
         self.dropOffPos = np.array([[1,0,0,0.56],
                                     [0,1,0,0.15],
                                     [0,0,-1,0.24],
                                     [0,0,0,1]])
-        self.placedBlocks = 0
 
     def start(self):
         """
@@ -77,25 +72,6 @@ class FinalAssist:
             return jointConfig
         else:
             print(message)
-            return self.neutralPos
-
-    def getDropoffPos(self):
-        """
-        Gets the dropoff position based on previous
-        dropoffs
-        
-        INPUTS:
-
-        OUTPUTS:
-        jointConfig - 1x7 array of the joint configurations
-        """
-        jointConfig,_,success,message =   self.ik.inverse(self.dropT,self.neutralPos, 'J_pseudo', 0.3)
-
-        if success:
-            return jointConfig
-        else:
-            print(message)
-
             return self.neutralPos
 
     def pickUp(self, blockPose):
@@ -175,7 +151,7 @@ class FinalAssist:
         self.arm.safe_move_to_position(drop)
         self.arm.open_gripper()
         self.arm.safe_move_to_position(self.neutralDrop)
-        self.dropOffPos[2,3] += 0.05
+        print(self.dropOffPos)
 
 
         
