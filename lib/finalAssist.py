@@ -115,27 +115,27 @@ class FinalAssist:
         right above the block
         """
         print("Approaching Block...")
-        blockPose = np.array([[1,0,0,blockPose[0,3]],
+        blockPose = np.array([[1,0,0,blockPose[0,3]+0.025],
                                 [0,-1,0,blockPose[1,3]],
-                                [0,0,-1,blockPose[2,3]],
+                                [0,0,-1,blockPose[2,3]+0.075],
                                 [0,0,0,1]])
-        blockPose[0,3] -= 0.025
-        blockPose[2,3] += 0.075
-        
+
         jointConfig = self.getJointConfig(blockPose)
         #print("Joint Config: ", jointConfig)
         self.arm.safe_move_to_position(jointConfig)
         pose = self.detectBlocks()[0]
-        #print("Updated Pose: ", np.round(orientation,4))
         angle = np.arccos((np.trace(pose) -1)/2)
-        print(angle)
+        print("Old Pose: ", np.round(pose,4))
+
         pose[:3,:3] = np.array([[np.cos(angle),-np.sin(angle),0],
                                 [np.sin(angle),np.cos(angle),0],
                                 [0,0,1]])
+
         pose = pose @ np.array([[1,0,0,0],
                                 [0,-1,0,0],
                                 [0,0,-1,0],
                                 [0,0,0,1]])
+        print("Updated Pose: ", np.round(pose,4))
         
         
         return pose, jointConfig
@@ -151,7 +151,7 @@ class FinalAssist:
         self.arm.safe_move_to_position(drop)
         self.arm.open_gripper()
         self.arm.safe_move_to_position(self.neutralDrop)
-        print(self.dropOffPos)
+        self.dropOffPos[2,3] += 0.05
 
 
         
