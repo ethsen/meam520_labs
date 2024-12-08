@@ -33,6 +33,7 @@ if __name__ == "__main__":
     blockPoses = fa.detectBlocks()
     for pose in blockPoses:
         fa.pickUp(pose)
+        fa.dropOff()
 
 
     """
