@@ -194,8 +194,8 @@ class FinalAssist:
                 top_face_col = i
                 flip = True
                 break
-            else:
-                raise ValueError("No column aligns with the top face direction [0, 0, ±1].")
+        else:
+            raise ValueError("No column aligns with the top face direction [0, 0, ±1].")
 
         
         # If the top face is already in the third column and correctly oriented, return the pose
