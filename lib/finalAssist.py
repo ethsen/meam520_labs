@@ -94,7 +94,7 @@ class FinalAssist:
         self.arm.open_gripper()
 
         blockPose, bestGuess = self.approach(blockPose)
-        print(blockPose)
+        
         jointConfig = self.getJointConfig(blockPose, bestGuess)
         bestGuess[4:] = jointConfig[4:]
         self.arm.safe_move_to_position(bestGuess)
@@ -185,11 +185,11 @@ class FinalAssist:
             col = rotDetected[:, i]
             if np.allclose(col, [0, 0, 1], atol=1e-3):
                 top_face_col = i
-                flip = True
+                flip = False
                 break
             elif np.allclose(col, [0, 0, -1], atol=1e-3):
                 top_face_col = i
-                flip = False
+                flip = True
                 break
         else:
             raise ValueError("No column aligns with the top face direction [0, 0, ±1].")
