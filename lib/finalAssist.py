@@ -94,7 +94,7 @@ class FinalAssist:
         self.arm.open_gripper()
 
         blockPose, bestGuess = self.approach(blockPose)
-        
+        print(blockPose)
         jointConfig = self.getJointConfig(blockPose, bestGuess)
         bestGuess[4:] = jointConfig[4:]
         self.arm.safe_move_to_position(bestGuess)
