@@ -43,6 +43,7 @@ class FinalAssist:
         for i in range(51):
             blocks = self.detector.get_detections()
             for id,pose in blocks:
+                pose = cameraToWorld @ pose
                 if id in blockDict:
                     blockDict[id] += pose
                 else:
