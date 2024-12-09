@@ -128,6 +128,10 @@ class FinalAssist:
         aboveBlock = self.getJointConfig(blockPose)
         self.arm.safe_move_to_position(aboveBlock)
         pose = self.detectBlocks()[0]
+        pose = pose @ np.array([[-1,0,0,0],
+                                [0,1,0,0],
+                                [0,0,-1,0],
+                                [0,0,0,1]])
         """
         if self.checkAxisofRot(pose) != 2:
             blockPose[:3,:3] = np.array([[-1,0,0],
@@ -144,11 +148,6 @@ class FinalAssist:
         pose[:3,:3] = np.array([[np.cos(angle),-np.sin(angle),0],
                                 [np.sin(angle),np.cos(angle),0],
                                 [0,0,1]])
-        
-        pose = pose @ np.array([[-1,0,0,0],
-                                [0,1,0,0],
-                                [0,0,-1,0],
-                                [0,0,0,1]])
         """        
         #print("Updated Pose: ", np.round(pose,4))        
         
@@ -185,11 +184,11 @@ class FinalAssist:
             col = rotDetected[:, i]
             if np.allclose(col, [0, 0, 1], atol=1e-3):
                 top_face_col = i
-                flip = True
+                flip = False
                 break
             elif np.allclose(col, [0, 0, -1], atol=1e-3):
                 top_face_col = i
-                flip = False
+                flip = True
                 break
         else:
             raise ValueError("No column aligns with the top face direction [0, 0, ±1].")
