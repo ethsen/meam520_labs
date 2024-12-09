@@ -185,11 +185,11 @@ class FinalAssist:
             col = rotDetected[:, i]
             if np.allclose(col, [0, 0, 1], atol=1e-3):
                 top_face_col = i
-                flip = False
+                flip = True
                 break
             elif np.allclose(col, [0, 0, -1], atol=1e-3):
                 top_face_col = i
-                flip = True
+                flip = False
                 break
         else:
             raise ValueError("No column aligns with the top face direction [0, 0, ±1].")
