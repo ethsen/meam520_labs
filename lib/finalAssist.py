@@ -186,11 +186,11 @@ class FinalAssist:
             col = rotDetected[:, i]
             if np.allclose(col, [0, 0, 1], atol=1e-3):
                 top_face_col = i
-                flip = False
+                flip = True
                 break
             elif np.allclose(col, [0, 0, -1], atol=1e-3):
                 top_face_col = i
-                flip = True
+                flip = False
                 break
         else:
             raise ValueError("No column aligns with the top face direction [0, 0, ±1].")
@@ -206,7 +206,9 @@ class FinalAssist:
 
         # If the top face points to -z, flip the orientation
         if flip:
-            R_swap[:, 2] *= -1
+           R_swap = R_swap @ np.array([[-1,0,0,],
+                                [0,1,0,],
+                                [0,0,-1,]])
 
         # Adjust the rotation matrix
         R_corrected = np.dot(rotDetected, R_swap)
