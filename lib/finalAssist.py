@@ -126,9 +126,11 @@ class FinalAssist:
         aboveBlock = self.getJointConfig(blockPose)
         self.arm.safe_move_to_position(aboveBlock)
         pose = self.detectBlocks()[0]
-        while self.checkAxisofRot(pose) != 2:
-            blockPose[0,3] -= 0.025
-            blockPose[2,3] += 0.01
+        if self.checkAxisofRot(pose) != 2:
+            blockPose[:3,:3] = np.array([[-1,0,0],
+                                        [0,1,0],
+                                        [0,0,-1]])
+         
             adjPos = self.getJointConfig(blockPose)
             self.arm.safe_move_to_position(adjPos)
             pose = self.detectBlocks()[0]
