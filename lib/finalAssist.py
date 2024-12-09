@@ -123,10 +123,15 @@ class FinalAssist:
                                 [0,0,-1,blockPose[2,3]+0.075],
                                 [0,0,0,1]])
 
-        jointConfig = self.getJointConfig(blockPose)
-        self.arm.safe_move_to_position(jointConfig)
+        aboveBlock = self.getJointConfig(blockPose)
+        self.arm.safe_move_to_position(aboveBlock)
         pose = self.detectBlocks()[0]
-        
+        while self.checkAxisofRot(pose) != 2:
+            blockPose[0,3] -= 0.025
+            adjPos = self.getJointConfig(blockPose)
+            self.arm.safe_move_to_position(adjPos)
+            pose = self.detectBlocks()[0]
+        """
         angle = np.arccos((np.trace(pose[:3,:3]) -1)/2) #+ pi/4
         print("Old Pose: ", np.round(pose,4))
 
@@ -138,9 +143,11 @@ class FinalAssist:
                                 [0,1,0,0],
                                 [0,0,-1,0],
                                 [0,0,0,1]])
+
+        """
         #print("Updated Pose: ", np.round(pose,4))        
         
-        return pose, jointConfig
+        return pose, aboveBlock
     
     def dropOff(self):
         """
@@ -154,3 +161,24 @@ class FinalAssist:
         self.arm.open_gripper()
         self.arm.safe_move_to_position(self.neutralDrop)
         self.dropOffPos[2,3] += 0.05
+
+    def checkAxisofRot(orientation):
+        """
+        Finds the axis of rotation for a given
+        orientation.
+
+        INPUTS:
+        orientation - 3x3 rotation matrix
+
+        OUTPUTS:
+        axis - axis of rotation
+        """
+        orientation = orientation[:3,:3]
+        if np.allclose(orientation[0], [1, 0, 0]):  # First row fixed
+            return 0
+        elif np.allclose(orientation[1], [0, 1, 0]):  # Second row fixed
+            return 1
+        elif np.allclose(orientation[2], [0, 0, 1]):  # Third row fixed
+            return 2
+        else:
+            return "Unknown"
