@@ -175,11 +175,15 @@ class FinalAssist:
         axis - axis of rotation
         """
         orientation = orientation[:3,:3]
+        print(orientation)
         if np.allclose(orientation[0], [1, 0, 0]):  # First row fixed
+            print('x')
             return 0
         elif np.allclose(orientation[1], [0, 1, 0]):  # Second row fixed
+            print('y')
             return 1
         elif np.allclose(orientation[2], [0, 0, 1]):  # Third row fixed
+            print('z')
             return 2
         else:
-            return "Unknown"
+            return 3
