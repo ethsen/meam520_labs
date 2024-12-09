@@ -206,8 +206,8 @@ class FinalAssist:
 
         # If the top face points to -z, flip the orientation
         if flip:
-           R_swap = R_swap @ np.array([[-1,0,0,],
-                                [0,1,0,],
+           R_swap = R_swap @ np.array([[1,0,0,],
+                                [0,-1,0,],
                                 [0,0,-1,]])
 
         # Adjust the rotation matrix
