@@ -41,17 +41,18 @@ class FinalAssist:
 
         cameraToWorld = currT0e @ self.detector.get_H_ee_camera()
         #print("Cam2World: ",np.round(cameraToWorld))
-        for _ in range(1):
+        for _ in range(50):
             blocks = self.detector.get_detections()
             for id, pose in blocks:
-                #print(np.round(pose,4))
+                pose = self.adjustRotation(pose)
+                print(np.round(pose,4))
                 world_pose = cameraToWorld @ pose
                 if id not in blockDict:
                     blockDict[id] = np.zeros_like(world_pose)  # Initialize to a zero array
                 blockDict[id] += world_pose
 
         # Compute the average pose for each block
-        poses = [blockDict[id] / 1 for id in blockDict]
+        poses = [blockDict[id] / 50 for id in blockDict]
 
         return poses
     
@@ -137,11 +138,10 @@ class FinalAssist:
             adjPos = self.getJointConfig(blockPose)
             self.arm.safe_move_to_position(adjPos)
             pose = self.detectBlocks()[0]
-        """
+        
         angle = np.arccos((np.trace(pose[:3,:3]) -1)/2) #+ pi/4
         print("Old Pose: ", np.round(pose,4))
-
-        """
+        
         pose[:3,:3] = np.array([[np.cos(angle),-np.sin(angle),0],
                                 [np.sin(angle),np.cos(angle),0],
                                 [0,0,1]])
@@ -150,9 +150,7 @@ class FinalAssist:
                                 [0,1,0,0],
                                 [0,0,-1,0],
                                 [0,0,0,1]])
-        """
-        pose = self.adjustRotation(pose)
-        
+        """        
         #print("Updated Pose: ", np.round(pose,4))        
         
         return pose, aboveBlock
@@ -182,14 +180,40 @@ class FinalAssist:
         OUPUTS:
         adjPose - 4x4 matrix after adjusting pose 
         """
-        columns = pose[:, :3]
-        x_candidates = [col for col in columns if np.linalg.norm(col) > 1e-3]
-        x = x_candidates[0]
-        x = x.flatten()
-        y = np.cross(np.array([0, 0, -1]), x)
-        output = np.eye(4)
-        output[:3, 3] = pose[:3, 3]
-        output[:3, :3] = np.column_stack((x, y, np.array([0, 0, -1])))
+        rotDetected= pose[:3, :3]
+        tDetected = pose[:3, 3]
+        for i in range(3):
+            col = rotDetected[:, i]
+            if np.allclose(col, [0, 0, 1], atol=1e-6):
+                top_face_col = i
+                flip = False
+                break
+            elif np.allclose(col, [0, 0, -1], atol=1e-6):
+                top_face_col = i
+                flip = True
+                break
+            else:
+                raise ValueError("No column aligns with the top face direction [0, 0, ±1].")
 
         
-        return output
+        # If the top face is already in the third column and correctly oriented, return the pose
+        if top_face_col == 2 and not flip:
+            return pose
+
+        # Construct a permutation matrix to swap columns
+        R_swap = np.eye(3)
+        R_swap[:, [2, top_face_col]] = R_swap[:, [top_face_col, 2]]  # Swap the third column with the top_face_col
+
+        # If the top face points to -z, flip the orientation
+        if flip:
+            R_swap[:, 2] *= -1
+
+        # Adjust the rotation matrix
+        R_corrected = np.dot(rotDetected, R_swap)
+
+        # Construct the corrected pose
+        pose_corrected = np.eye(4)
+        pose_corrected[:3, :3] = R_corrected
+        pose_corrected[:3, 3] = tDetected  # Keep the translation unchanged
+
+        return pose_corrected
