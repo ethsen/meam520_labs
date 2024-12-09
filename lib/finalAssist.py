@@ -34,19 +34,27 @@ class FinalAssist:
         OUTPUTS:
         poses - Array of poses for each block in world frame
         """
+        blockDict = {}
         currT0e = self.fk.forward(self.arm.get_positions())[1]
         #print("currT0e: ", np.round(currT0e))
 
         cameraToWorld = currT0e @ self.detector.get_H_ee_camera()
         #print("Cam2World: ",np.round(cameraToWorld))
-        blocks = self.detector.get_detections()
-        poses = []
-        for _,pose in blocks:
-            #print("Pose in camera frame: ",np.round(pose,4))
-            pose = cameraToWorld @ pose
-            #print("Pose in world frame: ",np.round(pose,4))
-            poses.append(pose)
+        for i in range(51):
+            blocks = self.detector.get_detections()
+            for id,pose in blocks:
+                if id in blockDict:
+                    blockDict[id] += pose
+                else:
+                    blockDict[id] = pose
 
+        poses = blockDict.values() / 50
+        """
+        #print("Pose in camera frame: ",np.round(pose,4))
+        pose = cameraToWorld @ pose
+        #print("Pose in world frame: ",np.round(pose,4))
+        poses.append(pose)
+        """
         return poses
     
     def getJointConfig(self,transformation, guess = np.array([-pi/8,0,0,-pi/2,0,pi/2,pi/4])):
@@ -122,7 +130,7 @@ class FinalAssist:
         jointConfig = self.getJointConfig(blockPose)
         self.arm.safe_move_to_position(jointConfig)
         pose = self.detectBlocks()[0]
-        angle = np.arccos((np.trace(pose[:3,:3]) -1)/2) + pi/4
+        angle = np.arccos((np.trace(pose[:3,:3]) -1)/2) #+ pi/4
         print("Old Pose: ", np.round(pose,4))
 
         pose[:3,:3] = np.array([[np.cos(angle),-np.sin(angle),0],
