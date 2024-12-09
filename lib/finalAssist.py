@@ -40,16 +40,16 @@ class FinalAssist:
 
         cameraToWorld = currT0e @ self.detector.get_H_ee_camera()
         #print("Cam2World: ",np.round(cameraToWorld))
-        for i in range(51):
+        for _ in range(50):
             blocks = self.detector.get_detections()
-            for id,pose in blocks:
-                pose = cameraToWorld @ pose
-                if id in blockDict:
-                    blockDict[id] += pose
-                else:
-                    blockDict[id] = pose
+            for id, pose in blocks:
+                world_pose = cameraToWorld @ pose
+                if id not in blockDict:
+                    blockDict[id] = np.zeros_like(world_pose)  # Initialize to a zero array
+                blockDict[id] += world_pose
 
-        poses = blockDict.values() / 50
+        # Compute the average pose for each block
+        poses = {id: blockDict[id] / 50 for id in blockDict}
         """
         #print("Pose in camera frame: ",np.round(pose,4))
         pose = cameraToWorld @ pose
