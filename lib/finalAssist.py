@@ -128,7 +128,6 @@ class FinalAssist:
         aboveBlock = self.getJointConfig(blockPose)
         self.arm.safe_move_to_position(aboveBlock)
         pose = self.detectBlocks()[0]
-        print(np.round(pose,4))
         """
         if self.checkAxisofRot(pose) != 2:
             blockPose[:3,:3] = np.array([[-1,0,0],
@@ -138,7 +137,7 @@ class FinalAssist:
             adjPos = self.getJointConfig(blockPose)
             self.arm.safe_move_to_position(adjPos)
             pose = self.detectBlocks()[0]
-        
+        """
         angle = np.arccos((np.trace(pose[:3,:3]) -1)/2) #+ pi/4
         print("Old Pose: ", np.round(pose,4))
         
@@ -150,7 +149,7 @@ class FinalAssist:
                                 [0,1,0,0],
                                 [0,0,-1,0],
                                 [0,0,0,1]])
-        """        
+              
         #print("Updated Pose: ", np.round(pose,4))        
         
         return pose, aboveBlock
