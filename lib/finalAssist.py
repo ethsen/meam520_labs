@@ -182,14 +182,15 @@ class FinalAssist:
         adjPose - 4x4 matrix after adjusting pose 
         """
         rotDetected= pose[:3, :3]
+        print(rotDetected)
         tDetected = pose[:3, 3]
         for i in range(3):
             col = rotDetected[:, i]
-            if np.allclose(col, [0, 0, 1], atol=1e-6):
+            if np.allclose(col, [0, 0, 1], atol=1e-3):
                 top_face_col = i
                 flip = False
                 break
-            elif np.allclose(col, [0, 0, -1], atol=1e-6):
+            elif np.allclose(col, [0, 0, -1], atol=1e-3):
                 top_face_col = i
                 flip = True
                 break
