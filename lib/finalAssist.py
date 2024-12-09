@@ -121,23 +121,21 @@ class FinalAssist:
                                 [0,0,0,1]])
 
         jointConfig = self.getJointConfig(blockPose)
-        #print("Joint Config: ", jointConfig)
         self.arm.safe_move_to_position(jointConfig)
         pose = self.detectBlocks()[0]
-        angle = np.arccos((np.trace(pose[:3,:3]) -1)/2)
-        print("Old Pose: ", np.round(pose,4))
+        if pose[2,3] != -1:
+            angle = np.arccos((np.trace(pose[:3,:3]) -1)/2)
+            print("Old Pose: ", np.round(pose,4))
 
-        pose[:3,:3] = np.array([[np.cos(angle),-np.sin(angle),0],
-                                [np.sin(angle),np.cos(angle),0],
-                                [0,0,1]])
+            pose[:3,:3] = np.array([[np.cos(angle),-np.sin(angle),0],
+                                    [np.sin(angle),np.cos(angle),0],
+                                    [0,0,1]])
 
-        pose = pose @ np.array([[1,0,0,0],
-                                [0,-1,0,0],
-                                [0,0,-1,0],
-                                [0,0,0,1]])
-        print("Updated Pose: ", np.round(pose,4))
-        
-        
+            pose = pose @ np.array([[1,0,0,0],
+                                    [0,-1,0,0],
+                                    [0,0,-1,0],
+                                    [0,0,0,1]])
+            print("Updated Pose: ", np.round(pose,4))        
         return pose, jointConfig
     
     def dropOff(self):
