@@ -44,9 +44,7 @@ class FinalAssist:
         for _ in range(50):
             blocks = self.detector.get_detections()
             for id, pose in blocks:
-                print(np.round(pose,4))
                 pose = self.adjustRotation(pose)
-                print(np.round(pose,4))
                 world_pose = cameraToWorld @ pose
                 if id not in blockDict:
                     blockDict[id] = np.zeros_like(world_pose)  # Initialize to a zero array
@@ -185,7 +183,6 @@ class FinalAssist:
         tDetected = pose[:3, 3]
         for i in range(3):
             col = rotDetected[:, i]
-            print(col)
             if np.allclose(col, [0, 0, 1], atol=1e-3):
                 top_face_col = i
                 flip = False
