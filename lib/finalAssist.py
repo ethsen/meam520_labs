@@ -41,7 +41,7 @@ class FinalAssist:
 
         cameraToWorld = currT0e @ self.detector.get_H_ee_camera()
         #print("Cam2World: ",np.round(cameraToWorld))
-        for _ in range(50):
+        for _ in range(1):
             blocks = self.detector.get_detections()
             for id, pose in blocks:
                 pose = self.adjustRotation(pose)
@@ -51,7 +51,7 @@ class FinalAssist:
                 blockDict[id] += world_pose
 
         # Compute the average pose for each block
-        poses = [blockDict[id] / 50 for id in blockDict]
+        poses = [blockDict[id] / 1 for id in blockDict]
 
         return poses
     
@@ -128,10 +128,6 @@ class FinalAssist:
         aboveBlock = self.getJointConfig(blockPose)
         self.arm.safe_move_to_position(aboveBlock)
         pose = self.detectBlocks()[0]
-        pose = pose @ np.array([[-1,0,0,0],
-                                [0,1,0,0],
-                                [0,0,-1,0],
-                                [0,0,0,1]])
         """
         if self.checkAxisofRot(pose) != 2:
             blockPose[:3,:3] = np.array([[-1,0,0],
@@ -148,6 +144,11 @@ class FinalAssist:
         pose[:3,:3] = np.array([[np.cos(angle),-np.sin(angle),0],
                                 [np.sin(angle),np.cos(angle),0],
                                 [0,0,1]])
+        
+        pose = pose @ np.array([[-1,0,0,0],
+                                [0,1,0,0],
+                                [0,0,-1,0],
+                                [0,0,0,1]])
         """        
         #print("Updated Pose: ", np.round(pose,4))        
         
@@ -179,6 +180,7 @@ class FinalAssist:
         adjPose - 4x4 matrix after adjusting pose 
         """
         rotDetected= pose[:3, :3]
+        print(rotDetected)
         tDetected = pose[:3, 3]
         for i in range(3):
             col = rotDetected[:, i]
@@ -213,5 +215,5 @@ class FinalAssist:
         pose_corrected = np.eye(4)
         pose_corrected[:3, :3] = R_corrected
         pose_corrected[:3, 3] = tDetected  # Keep the translation unchanged
-
+        print(R_corrected)
         return pose_corrected
