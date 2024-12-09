@@ -49,7 +49,7 @@ class FinalAssist:
                 blockDict[id] += world_pose
 
         # Compute the average pose for each block
-        poses = {id: blockDict[id] / 50 for id in blockDict}
+        print(blockDict)
         """
         #print("Pose in camera frame: ",np.round(pose,4))
         pose = cameraToWorld @ pose
