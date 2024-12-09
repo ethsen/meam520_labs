@@ -123,7 +123,7 @@ class FinalAssist:
         jointConfig = self.getJointConfig(blockPose)
         self.arm.safe_move_to_position(jointConfig)
         pose = self.detectBlocks()[0]
-        if pose[2,3] != -1:
+        if pose[2,2] != -1:
             angle = np.arccos((np.trace(pose[:3,:3]) -1)/2)
             print("Old Pose: ", np.round(pose,4))
 
