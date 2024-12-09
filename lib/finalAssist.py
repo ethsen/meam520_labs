@@ -2,6 +2,7 @@ from lib.IK_position_null import IK
 from lib.calculateFK import FK
 import numpy as np
 from math import pi
+from scipy.spatial.transform import Rotation
 
 class FinalAssist:
     def __init__(self,arm, detector) :
@@ -40,16 +41,17 @@ class FinalAssist:
 
         cameraToWorld = currT0e @ self.detector.get_H_ee_camera()
         #print("Cam2World: ",np.round(cameraToWorld))
-        for _ in range(50):
+        for _ in range(1):
             blocks = self.detector.get_detections()
             for id, pose in blocks:
+                print(np.round(pose,4))
                 world_pose = cameraToWorld @ pose
                 if id not in blockDict:
                     blockDict[id] = np.zeros_like(world_pose)  # Initialize to a zero array
                 blockDict[id] += world_pose
 
         # Compute the average pose for each block
-        poses = [blockDict[id] / 50 for id in blockDict]
+        poses = [blockDict[id] / 1 for id in blockDict]
 
         return poses
     
@@ -138,11 +140,10 @@ class FinalAssist:
         """
         angle = np.arccos((np.trace(pose[:3,:3]) -1)/2) #+ pi/4
         print("Old Pose: ", np.round(pose,4))
-
         pose[:3,:3] = np.array([[np.cos(angle),-np.sin(angle),0],
                                 [np.sin(angle),np.cos(angle),0],
                                 [0,0,1]])
-
+        
         pose = pose @ np.array([[-1,0,0,0],
                                 [0,1,0,0],
                                 [0,0,-1,0],
@@ -166,27 +167,15 @@ class FinalAssist:
         self.arm.safe_move_to_position(self.neutralDrop)
         self.dropOffPos[2,3] += 0.05
 
-    def checkAxisofRot(self,orientation):
+    @staticmethod
+    def adjustRotation(pose):
         """
-        Finds the axis of rotation for a given
-        orientation.
-
+        Adjusts the pose of the detected block in order
+        for the end-effector to easily grasp it. 
+        
         INPUTS:
-        orientation - 3x3 rotation matrix
+        pose - 4x4 matrix of a pose 
 
-        OUTPUTS:
-        axis - axis of rotation
+        OUPUTS:
+        adjPose - 4x4 matrix after adjusting pose 
         """
-        orientation = orientation[:3,:3]
-        print(orientation)
-        if np.allclose(orientation[0], [1, 0, 0]):  # First row fixed
-            print('x')
-            return 0
-        elif np.allclose(orientation[1], [0, 1, 0]):  # Second row fixed
-            print('y')
-            return 1
-        elif np.allclose(orientation[2], [0, 0, 1]):  # Third row fixed
-            print('z')
-            return 2
-        else:
-            return 3
