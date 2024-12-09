@@ -50,14 +50,14 @@ class FinalAssist:
 
         # Compute the average pose for each block
         poses = {id: blockDict[id] / 50 for id in blockDict}
-        print(poses)
+        print(poses.values())
         """
         #print("Pose in camera frame: ",np.round(pose,4))
         pose = cameraToWorld @ pose
         #print("Pose in world frame: ",np.round(pose,4))
         poses.append(pose)
         """
-        return poses
+        return poses.values()
     
     def getJointConfig(self,transformation, guess = np.array([-pi/8,0,0,-pi/2,0,pi/2,pi/4])):
         """
