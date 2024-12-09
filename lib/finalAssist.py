@@ -44,7 +44,7 @@ class FinalAssist:
         for _ in range(1):
             blocks = self.detector.get_detections()
             for id, pose in blocks:
-                print(np.round(pose,4))
+                #print(np.round(pose,4))
                 world_pose = cameraToWorld @ pose
                 if id not in blockDict:
                     blockDict[id] = np.zeros_like(world_pose)  # Initialize to a zero array
