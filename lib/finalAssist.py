@@ -128,6 +128,7 @@ class FinalAssist:
         pose = self.detectBlocks()[0]
         while self.checkAxisofRot(pose) != 2:
             blockPose[0,3] -= 0.025
+            blockPose[2,3] += 0.01
             adjPos = self.getJointConfig(blockPose)
             self.arm.safe_move_to_position(adjPos)
             pose = self.detectBlocks()[0]
