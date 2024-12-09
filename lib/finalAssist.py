@@ -180,7 +180,6 @@ class FinalAssist:
         adjPose - 4x4 matrix after adjusting pose 
         """
         rotDetected= pose[:3, :3]
-        print(rotDetected)
         tDetected = pose[:3, 3]
         for i in range(3):
             col = rotDetected[:, i]
@@ -217,5 +216,4 @@ class FinalAssist:
         pose_corrected = np.eye(4)
         pose_corrected[:3, :3] = R_corrected
         pose_corrected[:3, 3] = tDetected  # Keep the translation unchanged
-        print(R_corrected)
         return pose_corrected
