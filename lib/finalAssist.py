@@ -140,6 +140,8 @@ class FinalAssist:
         """
         angle = np.arccos((np.trace(pose[:3,:3]) -1)/2) #+ pi/4
         print("Old Pose: ", np.round(pose,4))
+
+        """
         pose[:3,:3] = np.array([[np.cos(angle),-np.sin(angle),0],
                                 [np.sin(angle),np.cos(angle),0],
                                 [0,0,1]])
@@ -148,7 +150,8 @@ class FinalAssist:
                                 [0,1,0,0],
                                 [0,0,-1,0],
                                 [0,0,0,1]])
-
+        """
+        pose = self.adjustRotation(pose)
         
         #print("Updated Pose: ", np.round(pose,4))        
         
@@ -179,3 +182,14 @@ class FinalAssist:
         OUPUTS:
         adjPose - 4x4 matrix after adjusting pose 
         """
+        columns = pose[:, :3]
+        x_candidates = [col for col in columns if np.linalg.norm(col) > 1e-3]
+        x = x_candidates[0]
+        x = x.flatten()
+        y = np.cross(np.array([0, 0, -1]), x)
+        output = np.eye(4)
+        output[:3, 3] = pose[:3, 3]
+        output[:3, :3] = np.column_stack((x, y, np.array([0, 0, -1])))
+
+        
+        return output
