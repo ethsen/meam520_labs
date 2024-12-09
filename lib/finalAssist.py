@@ -50,13 +50,7 @@ class FinalAssist:
 
         # Compute the average pose for each block
         poses = [blockDict[id] / 50 for id in blockDict]
-        print(poses)
-        """
-        #print("Pose in camera frame: ",np.round(pose,4))
-        pose = cameraToWorld @ pose
-        #print("Pose in world frame: ",np.round(pose,4))
-        poses.append(pose)
-        """
+
         return poses
     
     def getJointConfig(self,transformation, guess = np.array([-pi/8,0,0,-pi/2,0,pi/2,pi/4])):
@@ -132,6 +126,7 @@ class FinalAssist:
         jointConfig = self.getJointConfig(blockPose)
         self.arm.safe_move_to_position(jointConfig)
         pose = self.detectBlocks()[0]
+        """
         angle = np.arccos((np.trace(pose[:3,:3]) -1)/2) #+ pi/4
         print("Old Pose: ", np.round(pose,4))
 
@@ -144,6 +139,7 @@ class FinalAssist:
                                 [0,0,-1,0],
                                 [0,0,0,1]])
         print("Updated Pose: ", np.round(pose,4))        
+        """
         return pose, jointConfig
     
     def dropOff(self):
