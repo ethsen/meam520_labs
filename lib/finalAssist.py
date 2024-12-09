@@ -162,7 +162,7 @@ class FinalAssist:
         self.arm.safe_move_to_position(self.neutralDrop)
         self.dropOffPos[2,3] += 0.05
 
-    def checkAxisofRot(orientation):
+    def checkAxisofRot(self,orientation):
         """
         Finds the axis of rotation for a given
         orientation.
