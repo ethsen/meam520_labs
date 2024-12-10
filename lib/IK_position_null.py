@@ -7,7 +7,7 @@ from time import perf_counter
 from lib.calcJacobian import calcJacobian
 from lib.calculateFK import FK
 from lib.calcAngDiff import calcAngDiff
-from lib.IK_velocity import IK_velocity  #optional
+#from lib.IK_velocity import IK_velocity  #optional
 
 #from calcJacobian import calcJacobian
 #from calculateFK import FK
@@ -234,6 +234,8 @@ class IK:
         """
 
         q = seed
+        print(self.fk.forward(seed)[1])
+
         rollout = []
       
         ## gradient descent:
@@ -310,13 +312,13 @@ class IK:
     @staticmethod
     def singleTest():
         seed = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
-        target = np.array([[-0.999,0.0436,0,0.5098],
-                           [0.0436, -0.999,0, -0.2415],
-                           [0,0,1,0.2254],
-                           [0,0,0,1]])
+        target = np.array([[1,0,0,0.56],
+                            [0,-1,0,0.15],
+                            [0,0,-1,0.5],
+                            [0,0,0,1]])
         q, rollout, success, message = ik.inverse(target, seed, 'J_pseudo', 0.3)  #try both methods
 
-        print(message)
+        print(q)
 
 
 

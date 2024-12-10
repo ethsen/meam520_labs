@@ -2,7 +2,6 @@ from lib.IK_position_null import IK
 from lib.calculateFK import FK
 import numpy as np
 from math import pi
-from scipy.spatial.transform import Rotation
 
 class FinalAssist:
     def __init__(self,arm, detector) :
@@ -19,7 +18,7 @@ class FinalAssist:
                                     [0,-1,0,0.15],
                                     [0,0,-1,0.8],
                                     [0,0,0,1]])
-        self.neutralDrop = np.array([pi/8,0,0,-pi/2,0,pi/2,pi/4])
+        self.neutralDrop = np.array([0.15668, 0.07189, 0.11041,-1.53771, -0.00792, 1.60917, 1.05251])
 
     def start(self):
         """
@@ -132,28 +131,6 @@ class FinalAssist:
         aboveBlock = self.getJointConfig(blockPose)
         self.arm.safe_move_to_position(aboveBlock)
         pose = self.detectBlocks()[0]
-        """
-        if self.checkAxisofRot(pose) != 2:
-            blockPose[:3,:3] = np.array([[-1,0,0],
-                                        [0,1,0],
-                                        [0,0,-1]])
-         
-            adjPos = self.getJointConfig(blockPose)
-            self.arm.safe_move_to_position(adjPos)
-            pose = self.detectBlocks()[0]
-        
-        angle = np.arccos((np.trace(pose[:3,:3]) -1)/2) #+ pi/4
-        print("Old Pose: ", np.round(pose,4))
-        
-        pose[:3,:3] = np.array([[np.cos(angle),-np.sin(angle),0],
-                                [np.sin(angle),np.cos(angle),0],
-                                [0,0,1]])
-        
-        pose = pose @ np.array([[1,0,0,0],
-                                [0,-1,0,0],
-                                [0,0,-1,0],
-                                [0,0,0,1]])
-        """
         pose = pose @ np.array([[-1,0,0,0],
                                 [0,-1,0,0],
                                 [0,0,1,0],
@@ -179,7 +156,7 @@ class FinalAssist:
     def adjustRotation(pose):
         """
         Adjusts the pose of the detected block in order
-        for the end-effector to easily grasp it. 
+        for the end-effector to correctly grasp each block. 
         
         INPUTS:
         pose - 4x4 matrix of a pose 
@@ -223,10 +200,7 @@ class FinalAssist:
             rotDetected = rotDetected @ np.array([[1,0,0],
                                                   [0,-1,0],
                                                   [0,0,-1]])
-        #print(np.round(rotDetected,4))
-
-        # Construct the corrected pose
         pose_corrected = np.eye(4)
         pose_corrected[:3, :3] = rotDetected
-        pose_corrected[:3, 3] = tDetected  # Keep the translation unchanged
+        pose_corrected[:3, 3] = tDetected  
         return pose_corrected
