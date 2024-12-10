@@ -49,9 +49,9 @@ class FinalAssist:
         for _ in range(1):
             blocks = self.detector.get_detections()
             for id, pose in blocks:
-                print("pose: ", np.round(pose[:3,:3],4))
-                #print("Transposed Pose: ", pose[:3,:3].T)
+                print("old pose: ", np.round(pose[:3,:3],4))
                 pose = self.adjustRotation(pose)
+                print("updated Pose: ", np.round(pose[:3,:3],4))
                 world_pose = cameraToWorld @ pose
                 if id not in blockDict:
                     blockDict[id] = np.zeros_like(world_pose)  # Initialize to a zero array
@@ -192,20 +192,36 @@ class FinalAssist:
             col = rotDetected[:, i]
             if np.allclose(col, [0, 0, 1], atol=1e-3):
                 top_face_col = i
-                flip = True
+                flip = -1
                 break
             elif np.allclose(col, [0, 0, -1], atol=1e-3):
                 top_face_col = i
-                flip = False
+                flip = 1
                 break
         else:
             raise ValueError("No column aligns with the top face direction [0, 0, ±1].")
 
         
-        # If the top face is already in the third column and correctly oriented, return the pose
-        if top_face_col == 2 and not flip:
-            return pose
+        if top_face_col == 0:
+            angle = pi/2 * flip
+            rotY = np.array([[np.cos(angle),0,np.sin(angle)],
+                             [0,1,0],
+                             [-np.sin(angle),0,np.cos(angle)]])
+            rotDetected = rotDetected @ rotY
 
+        elif top_face_col == 1:
+            angle = pi/2 * flip
+            rotX= np.array([[np.cos(angle),-np.sin(angle),0]
+                             [np.sin(angle),1,0],
+                             [0,0,1]])
+            rotDetected = rotDetected @ rotX
+
+        elif flip == 1:
+            rotDetected = rotDetected @ np.array([[1,0,0],
+                                                  [0,-1,0],
+                                                  [0,0,-1]])
+
+        """
         # Construct a permutation matrix to swap columns
         R_swap = np.eye(3)
         R_swap[:, [2, top_face_col]] = R_swap[:, [top_face_col, 2]]  # Swap the third column with the top_face_col
@@ -218,9 +234,9 @@ class FinalAssist:
 
         # Adjust the rotation matrix
         R_corrected = np.dot(rotDetected, R_swap)
-
+        """
         # Construct the corrected pose
         pose_corrected = np.eye(4)
-        pose_corrected[:3, :3] = R_corrected
+        pose_corrected[:3, :3] = rotDetected
         pose_corrected[:3, 3] = tDetected  # Keep the translation unchanged
         return pose_corrected
