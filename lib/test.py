@@ -34,6 +34,10 @@ def adjustRotation(pose):
             rotY = np.array([[np.cos(angle),0,np.sin(angle)],
                              [0,1,0],
                              [-np.sin(angle),0,np.cos(angle)]])
+            if flip == 1:
+                rotY = rotY @ np.array([[-1,0,0],
+                                    [0,-1,0],
+                                    [0,0,1]])
             rotDetected = rotDetected @ rotY
 
         elif top_face_col == 1:
@@ -96,8 +100,8 @@ def test_adjustRotation():
             "input": create_pose(np.array([[0, 0, 1],
                                            [0, -1, 0],
                                            [1, 0, 0]]), [0.1, 0.2, 0.3]),
-            "expected_rotation": np.array([[-1, 0, 0],
-                                           [0, -1, 0],
+            "expected_rotation": np.array([[1, 0, 0],
+                                           [0, 1, 0],
                                            [0, 0, 1]])
         },
         {
