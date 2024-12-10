@@ -184,7 +184,7 @@ class FinalAssist:
         adjPose - 4x4 matrix after adjusting pose 
         """
         rotDetected= pose[:3, :3]
-        print(rotDetected)
+        print(np.round(rotDetected,4))
         tDetected = pose[:3, 3]
         for i in range(3):
             col = rotDetected[:, i]
@@ -206,6 +206,7 @@ class FinalAssist:
                              [0,1,0],
                              [-np.sin(angle),0,np.cos(angle)]])
             rotDetected = rotDetected @ rotY
+            print(np.round(rotDetected,4))
 
         elif top_face_col == 1:
             angle = pi/2 * flip
