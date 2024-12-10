@@ -49,9 +49,7 @@ class FinalAssist:
         for _ in range(1):
             blocks = self.detector.get_detections()
             for id, pose in blocks:
-                print("old pose: ", np.round(pose[:3,:3],4))
                 pose = self.adjustRotation(pose)
-                print("updated Pose: ", np.round(pose[:3,:3],4))
                 world_pose = cameraToWorld @ pose
                 if id not in blockDict:
                     blockDict[id] = np.zeros_like(world_pose)  # Initialize to a zero array
@@ -144,16 +142,16 @@ class FinalAssist:
             adjPos = self.getJointConfig(blockPose)
             self.arm.safe_move_to_position(adjPos)
             pose = self.detectBlocks()[0]
-        """
+        
         angle = np.arccos((np.trace(pose[:3,:3]) -1)/2) #+ pi/4
         print("Old Pose: ", np.round(pose,4))
         
         pose[:3,:3] = np.array([[np.cos(angle),-np.sin(angle),0],
                                 [np.sin(angle),np.cos(angle),0],
                                 [0,0,1]])
-        
-        pose = pose @ np.array([[-1,0,0,0],
-                                [0,1,0,0],
+        """
+        pose = pose @ np.array([[1,0,0,0],
+                                [0,-1,0,0],
                                 [0,0,-1,0],
                                 [0,0,0,1]])
               
