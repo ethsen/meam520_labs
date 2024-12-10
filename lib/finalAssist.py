@@ -52,7 +52,7 @@ class FinalAssist:
 
         cameraToWorld = currT0e @ self.detector.get_H_ee_camera()
         #print("Cam2World: ",np.round(cameraToWorld))
-        for _ in range(50):
+        for _ in range(1):
             blocks = self.detector.get_detections()
             for id, pose in blocks:
                 pose = self.adjustRotation(pose)
@@ -62,7 +62,7 @@ class FinalAssist:
                 blockDict[id] += world_pose
 
         # Compute the average pose for each block
-        poses = [blockDict[id] / 50 for id in blockDict]
+        poses = [blockDict[id] / 1 for id in blockDict]
 
         return poses
     
@@ -139,13 +139,6 @@ class FinalAssist:
         aboveBlock = self.getJointConfig(blockPose)
         self.arm.safe_move_to_position(aboveBlock)
         pose = self.detectBlocks()[0]
-        """
-        pose = pose @ np.array([[-1,0,0,0],
-                                [0,-1,0,0],
-                                [0,0,1,0],
-                                [0,0,0,1]])
-        """
-        #print("Updated Pose: ", np.round(pose,4))        
         
         return pose, aboveBlock
     
@@ -173,6 +166,7 @@ class FinalAssist:
         OUPUTS:
         adjPose - 4x4 matrix after adjusting pose 
         """
+        print("Adjusting Rotation")
         rotDetected= pose[:3, :3]
         tDetected = pose[:3, 3]
         for i in range(3):
