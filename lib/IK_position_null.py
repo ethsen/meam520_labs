@@ -234,8 +234,6 @@ class IK:
         """
 
         q = seed
-        print(self.fk.forward(seed)[1])
-
         rollout = []
       
         ## gradient descent:
