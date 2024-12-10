@@ -11,11 +11,16 @@ class FinalAssist:
         self.arm = arm
         self.detector = detector
         self.neutralPos = np.array([-pi/8,0,0,-pi/2,0,pi/2,pi/4])
-        self.neutralDrop = np.array([pi/8,0,0,-pi/2,0,pi/2,pi/4])
         self.dropOffPos = np.array([[1,0,0,0.56],
                                     [0,-1,0,0.15],
                                     [0,0,-1,0.24],
                                     [0,0,0,1]])
+        self.neutralDropPos = np.array([[1,0,0,0.56],
+                                    [0,-1,0,0.15],
+                                    [0,0,-1,0.8],
+                                    [0,0,0,1]])
+        self.neutralDrop = self.ik.inverse(self.neutralDropPos,np.array([pi/8,0,0,-pi/2,0,pi/2,pi/4]), 'J_pseudo', 0.3)
+
 
     def start(self):
         """
@@ -44,6 +49,8 @@ class FinalAssist:
         for _ in range(1):
             blocks = self.detector.get_detections()
             for id, pose in blocks:
+                print("pose: ", pose[:3,:3])
+                print("Transposed Pose: ", pose[:3,:3].T)
                 pose = self.adjustRotation(pose)
                 world_pose = cameraToWorld @ pose
                 if id not in blockDict:
@@ -185,11 +192,11 @@ class FinalAssist:
             col = rotDetected[:, i]
             if np.allclose(col, [0, 0, 1], atol=1e-3):
                 top_face_col = i
-                flip = False
+                flip = True
                 break
             elif np.allclose(col, [0, 0, -1], atol=1e-3):
                 top_face_col = i
-                flip = True
+                flip = False
                 break
         else:
             raise ValueError("No column aligns with the top face direction [0, 0, ±1].")
