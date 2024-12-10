@@ -19,8 +19,7 @@ class FinalAssist:
                                     [0,-1,0,0.15],
                                     [0,0,-1,0.8],
                                     [0,0,0,1]])
-        self.neutralDrop = self.ik.inverse(self.neutralDropPos,np.array([pi/8,0,0,-pi/2,0,pi/2,pi/4]), 'J_pseudo', 0.3)[0]
-
+        self.neutralDrop = np.array([pi/8,0,0,-pi/2,0,pi/2,pi/4])
 
     def start(self):
         """
