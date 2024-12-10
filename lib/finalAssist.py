@@ -208,6 +208,7 @@ class FinalAssist:
         pose_corrected[:3, 3] = tDetected  
 
         if not self.ik.inverse(pose_corrected, self.neutralPos, 'J_pseudo', 0.3)[2]:
+            print("fucked it")
             rotDetected = rotDetected @ np.array([[-1,0,0],
                                                   [0,-1,0],
                                                   [0,0,1]])
