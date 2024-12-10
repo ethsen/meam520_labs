@@ -211,7 +211,9 @@ class FinalAssist:
                              [0,np.cos(angle),-np.sin(angle)],
                              [0,np.sin(angle),np.cos(angle)]])
             rotDetected = rotDetected @ rotX
-
+            rotDetected = rotDetected @ np.array([[-1,0,0],
+                                                  [0,-1,0],
+                                                  [0,0,1]])
         elif flip == -1:
             rotDetected = rotDetected @ np.array([[1,0,0],
                                                   [0,-1,0],
