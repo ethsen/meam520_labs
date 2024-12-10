@@ -1,52 +1,31 @@
 from lib.IK_position_null import IK
 from lib.calculateFK import FK
 import numpy as np
-from math import pi, cos, sin
+from math import pi
+from scipy.spatial.transform import Rotation
 
 class FinalAssist:
-    def __init__(self, arm, detector):
+    def __init__(self,arm, detector) :
         self.ik = IK()
-        self.fk = FK()
+        self.fk =FK()
         self.arm = arm
         self.detector = detector
-        self.neutralPos = np.array([-pi/8, 0, 0, -pi/2, 0, pi/2, pi/4])
-        self.neutralDrop = np.array([pi/8, 0, 0, -pi/2, 0, pi/2, pi/4])
-        self.dropOffPos = np.array([[1, 0, 0, 0.56],
-                                    [0, -1, 0, 0.15],
-                                    [0, 0, -1, 0.24],
-                                    [0, 0, 0, 1]])
-        
-    @staticmethod
-    def flip(value1, value2):
-        """
-        Swap two values.
+        self.neutralPos = np.array([-pi/8,0,0,-pi/2,0,pi/2,pi/4])
+        self.dropOffPos = np.array([[1,0,0,0.56],
+                                    [0,-1,0,0.15],
+                                    [0,0,-1,0.24],
+                                    [0,0,0,1]])
+        self.neutralDropPos = np.array([[1,0,0,0.56],
+                                    [0,-1,0,0.15],
+                                    [0,0,-1,0.8],
+                                    [0,0,0,1]])
+        self.neutralDrop = self.ik.inverse(self.neutralDropPos,np.array([pi/8,0,0,-pi/2,0,pi/2,pi/4]), 'J_pseudo', 0.3)
 
-        Args:
-            value1: First value.
-            value2: Second value.
 
-        Returns:
-            tuple: Swapped values as (value2, value1).
-        """
-        return value2, value1
-
-    def zFlip(self, rotation_matrix, tol = .4):
-        """
-        Adjust rotation matrix to align z-axis properly.
-        """
-        column_no = -1
-        for i in range(3):
-            if np.abs(abs(rotation_matrix[2, i]) - 1) < tol:
-                column_no = i
-        if column_no != -1:
-            for i in range(3):
-                rotation_matrix[i, 2], rotation_matrix[i, column_no] = self.flip(rotation_matrix[i, 2], rotation_matrix[i, column_no])
-        if rotation_matrix[0, 0] * rotation_matrix[1, 1] < 0:
-            for i in range(3):
-                rotation_matrix[i, 0], rotation_matrix[i, 1] = self.flip(rotation_matrix[i, 0], rotation_matrix[i, 1])
-        return rotation_matrix
-    
     def start(self):
+        """
+        Sets the arm in the neutral position
+        """
         self.arm.safe_move_to_position(self.neutralPos)
 
     def detectBlocks(self):
@@ -67,20 +46,19 @@ class FinalAssist:
 
         cameraToWorld = currT0e @ self.detector.get_H_ee_camera()
         #print("Cam2World: ",np.round(cameraToWorld))
-        for _ in range(50):
+        for _ in range(1):
             blocks = self.detector.get_detections()
             for id, pose in blocks:
+                print("pose: ", pose[:3,:3])
+                #print("Transposed Pose: ", pose[:3,:3].T)
+                pose = self.adjustRotation(pose)
                 world_pose = cameraToWorld @ pose
                 if id not in blockDict:
                     blockDict[id] = np.zeros_like(world_pose)  # Initialize to a zero array
                 blockDict[id] += world_pose
 
         # Compute the average pose for each block
-        poses = [blockDict[id] / 50 for id in blockDict]
-
-        # Apply z_swap to align rotation matrices
-        for pose in poses:
-            pose[:3, :3] = self.zFlip(pose[:3, :3])
+        poses = [blockDict[id] / 1 for id in blockDict]
 
         return poses
     
@@ -107,7 +85,7 @@ class FinalAssist:
         else:
             print(message)
             return self.neutralPos
-        
+
     def pickUp(self, blockPose):
         """
         Pickup function for static blocks. The arm
@@ -167,10 +145,18 @@ class FinalAssist:
             self.arm.safe_move_to_position(adjPos)
             pose = self.detectBlocks()[0]
         """
-
-        pose[:3, :3] = self.zFlip(pose[:3, :3])
-
+        angle = np.arccos((np.trace(pose[:3,:3]) -1)/2) #+ pi/4
+        print("Old Pose: ", np.round(pose,4))
         
+        pose[:3,:3] = np.array([[np.cos(angle),-np.sin(angle),0],
+                                [np.sin(angle),np.cos(angle),0],
+                                [0,0,1]])
+        
+        pose = pose @ np.array([[-1,0,0,0],
+                                [0,1,0,0],
+                                [0,0,-1,0],
+                                [0,0,0,1]])
+              
         #print("Updated Pose: ", np.round(pose,4))        
         
         return pose, aboveBlock
@@ -188,27 +174,53 @@ class FinalAssist:
         self.arm.safe_move_to_position(self.neutralDrop)
         self.dropOffPos[2,3] += 0.05
 
-    def checkAxisofRot(self,orientation):
+    @staticmethod
+    def adjustRotation(pose):
         """
-        Finds the axis of rotation for a given
-        orientation.
-
+        Adjusts the pose of the detected block in order
+        for the end-effector to easily grasp it. 
+        
         INPUTS:
-        orientation - 3x3 rotation matrix
+        pose - 4x4 matrix of a pose 
 
-        OUTPUTS:
-        axis - axis of rotation
+        OUPUTS:
+        adjPose - 4x4 matrix after adjusting pose 
         """
-        orientation = orientation[:3,:3]
-        print(orientation)
-        if np.allclose(orientation[0], [1, 0, 0]):  # First row fixed
-            print('x')
-            return 0
-        elif np.allclose(orientation[1], [0, 1, 0]):  # Second row fixed
-            print('y')
-            return 1
-        elif np.allclose(orientation[2], [0, 0, 1]):  # Third row fixed
-            print('z')
-            return 2
+        rotDetected= pose[:3, :3]
+        tDetected = pose[:3, 3]
+        for i in range(3):
+            col = rotDetected[:, i]
+            if np.allclose(col, [0, 0, 1], atol=1e-3):
+                top_face_col = i
+                flip = True
+                break
+            elif np.allclose(col, [0, 0, -1], atol=1e-3):
+                top_face_col = i
+                flip = False
+                break
         else:
-            return 3
+            raise ValueError("No column aligns with the top face direction [0, 0, ±1].")
+
+        
+        # If the top face is already in the third column and correctly oriented, return the pose
+        if top_face_col == 2 and not flip:
+            return pose
+
+        # Construct a permutation matrix to swap columns
+        R_swap = np.eye(3)
+        R_swap[:, [2, top_face_col]] = R_swap[:, [top_face_col, 2]]  # Swap the third column with the top_face_col
+
+        # If the top face points to -z, flip the orientation
+        if flip:
+           R_swap = R_swap @ np.array([[1,0,0,],
+                                [0,-1,0,],
+                                [0,0,-1,]])
+
+        # Adjust the rotation matrix
+        R_corrected = np.dot(rotDetected, R_swap)
+
+        # Construct the corrected pose
+        pose_corrected = np.eye(4)
+        pose_corrected[:3, :3] = R_corrected
+        pose_corrected[:3, 3] = tDetected  # Keep the translation unchanged
+        return pose_corrected
