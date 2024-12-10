@@ -162,8 +162,7 @@ class FinalAssist:
         self.arm.safe_move_to_position(self.neutralDrop)
         self.dropOffPos[2,3] += 0.05
 
-    @staticmethod
-    def adjustRotation(pose):
+    def adjustRotation(self,pose):
         """
         Adjusts the pose of the detected block in order
         for the end-effector to correctly grasp each block. 
@@ -193,16 +192,10 @@ class FinalAssist:
         print("Init:", np.round(rotDetected,4))
 
         if top_face_col == 0:
-
             angle = pi/2 * flip
             rotY = np.array([[np.cos(angle),0,np.sin(angle)],
                              [0,1,0],
                              [-np.sin(angle),0,np.cos(angle)]])
-            
-            if flip == 1:
-                rotY = rotY @ np.array([[-1,0,0],
-                                    [0,-1,0],
-                                    [0,0,1]])
             rotDetected = rotDetected @ rotY
 
         elif top_face_col == 1:
@@ -218,10 +211,19 @@ class FinalAssist:
             rotDetected = rotDetected @ np.array([[1,0,0],
                                                   [0,-1,0],
                                                   [0,0,-1]])
-        print(top_face_col)
-        print(flip)
-        print("FInal:", np.round(rotDetected,4))
+            
         pose_corrected = np.eye(4)
         pose_corrected[:3, :3] = rotDetected
         pose_corrected[:3, 3] = tDetected  
+
+        if not self.ik.inverse(pose_corrected, self.neutralPos, 'J_pseudo', 0.3)[2]:
+            rotDetected = rotDetected @ np.array([[-1,0,0],
+                                                  [0,-1,0],
+                                                  [0,0,1]])
+            pose_corrected[:3, :3] = rotDetected
+            
         return pose_corrected
+        #print(top_face_col)
+        #print(flip)
+        #print("FInal:", np.round(rotDetected,4))
+        
