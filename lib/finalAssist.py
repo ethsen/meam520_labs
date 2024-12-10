@@ -206,7 +206,6 @@ class FinalAssist:
                              [0,1,0],
                              [-np.sin(angle),0,np.cos(angle)]])
             rotDetected = rotDetected @ rotY
-            print(np.round(rotDetected,4))
 
         elif top_face_col == 1:
             angle = pi/2 * flip
@@ -219,6 +218,7 @@ class FinalAssist:
             rotDetected = rotDetected @ np.array([[1,0,0],
                                                   [0,-1,0],
                                                   [0,0,-1]])
+        print(np.round(rotDetected,4))
 
         """
         # Construct a permutation matrix to swap columns
