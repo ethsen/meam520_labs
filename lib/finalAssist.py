@@ -209,7 +209,7 @@ class FinalAssist:
 
         elif top_face_col == 1:
             angle = pi/2 * flip
-            rotX= np.array([[np.cos(angle),-np.sin(angle),0]
+            rotX = np.array([[np.cos(angle),-np.sin(angle),0],
                              [np.sin(angle),1,0],
                              [0,0,1]])
             rotDetected = rotDetected @ rotX
