@@ -22,7 +22,7 @@ class FinalAssist:
                                         [0,-1,0,-0.15],
                                         [0,0,-1,0.24],
                                         [0,0,0,1]])
-            self.neutralDrop = np.array([-0.15668, 0.07189, 0.11041,-1.53771, -0.00792, 1.60917, 1.05251])
+            self.neutralDrop = np.array([-0.1286, 0.07215, -0.13995, -1.53771, 0.01006, 1.60915, 0.51682])
 
         else:
             self.neutralPos = np.array([-pi/8,0,0,-pi/2,0,pi/2,pi/4])
@@ -210,9 +210,9 @@ class FinalAssist:
             rotDetected = rotDetected @ np.array([[1,0,0],
                                                   [0,-1,0],
                                                   [0,0,-1]])
-        print(top_face_col)
-        print(flip)
-        print(np.round(rotDetected,4))
+        #print(top_face_col)
+        #print(flip)
+        #print(np.round(rotDetected,4))
         pose_corrected = np.eye(4)
         pose_corrected[:3, :3] = rotDetected
         pose_corrected[:3, 3] = tDetected  
