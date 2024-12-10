@@ -4,7 +4,8 @@ import numpy as np
 from math import pi
 
 class FinalAssist:
-    def __init__(self,arm, detector) :
+    def __init__(self,arm, detector,team) :
+        self.team = team
         self.ik = IK()
         self.fk =FK()
         self.arm = arm
@@ -44,7 +45,7 @@ class FinalAssist:
 
         cameraToWorld = currT0e @ self.detector.get_H_ee_camera()
         #print("Cam2World: ",np.round(cameraToWorld))
-        for _ in range(1):
+        for _ in range(50):
             blocks = self.detector.get_detections()
             for id, pose in blocks:
                 pose = self.adjustRotation(pose)
@@ -54,7 +55,7 @@ class FinalAssist:
                 blockDict[id] += world_pose
 
         # Compute the average pose for each block
-        poses = [blockDict[id] / 1 for id in blockDict]
+        poses = [blockDict[id] / 50 for id in blockDict]
 
         return poses
     
