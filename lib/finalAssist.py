@@ -17,7 +17,7 @@ class FinalAssist:
         Sets the arm in the neutral position
         """
         if self.team == 'blue':
-            self.neutralPos = np.array([pi/8,0,0,-pi/2,0,pi/2,pi/4])
+            self.neutralPos = np.array([pi/10,0,0,-pi/2,0,pi/2,pi/4])
             self.dropOffPos = np.array([[1,0,0,0.56],
                                         [0,-1,0,-0.15],
                                         [0,0,-1,0.24],
@@ -25,7 +25,7 @@ class FinalAssist:
             self.neutralDrop = np.array([-0.1286, 0.07215, -0.13995, -1.53771, 0.01006, 1.60915, 0.51682])
 
         else:
-            self.neutralPos = np.array([-pi/8,0,0,-pi/2,0,pi/2,pi/4])
+            self.neutralPos = np.array([-pi/10,0,0,-pi/2,0,pi/2,pi/4])
             self.dropOffPos = np.array([[1,0,0,0.56],
                                         [0,-1,0,0.15],
                                         [0,0,-1,0.24],
@@ -178,7 +178,7 @@ class FinalAssist:
         #print(np.round(rotDetected,4))
         tDetected = pose[:3, 3]
         for i in range(3):
-            col = rotDetected[:, i]
+            col = np.round(rotDetected[:, i],0)
             if np.allclose(col, [0, 0, 1], atol=1e-3):
                 top_face_col = i
                 flip = 1
@@ -190,7 +190,8 @@ class FinalAssist:
         else:
             raise ValueError("No column aligns with the top face direction [0, 0, ±1].")
 
-        
+        print("Init:", np.round(rotDetected,4))
+
         if top_face_col == 0:
 
             angle = pi/2 * flip
@@ -215,9 +216,9 @@ class FinalAssist:
             rotDetected = rotDetected @ np.array([[1,0,0],
                                                   [0,-1,0],
                                                   [0,0,-1]])
-        #print(top_face_col)
-        #print(flip)
-        #print(np.round(rotDetected,4))
+        print(top_face_col)
+        print(flip)
+        print("FInal:", np.round(rotDetected,4))
         pose_corrected = np.eye(4)
         pose_corrected[:3, :3] = rotDetected
         pose_corrected[:3, 3] = tDetected  
