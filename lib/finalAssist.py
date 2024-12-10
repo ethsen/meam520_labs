@@ -49,7 +49,7 @@ class FinalAssist:
         for _ in range(1):
             blocks = self.detector.get_detections()
             for id, pose in blocks:
-                print("pose: ", pose[:3,:3])
+                print("pose: ", np.round(pose[:3,:3],4))
                 #print("Transposed Pose: ", pose[:3,:3].T)
                 pose = self.adjustRotation(pose)
                 world_pose = cameraToWorld @ pose
