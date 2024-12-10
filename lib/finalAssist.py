@@ -184,23 +184,24 @@ class FinalAssist:
         adjPose - 4x4 matrix after adjusting pose 
         """
         rotDetected= pose[:3, :3]
-        print(np.round(rotDetected,4))
+        #print(np.round(rotDetected,4))
         tDetected = pose[:3, 3]
         for i in range(3):
             col = rotDetected[:, i]
             if np.allclose(col, [0, 0, 1], atol=1e-3):
                 top_face_col = i
-                flip = -1
+                flip = 1
                 break
             elif np.allclose(col, [0, 0, -1], atol=1e-3):
                 top_face_col = i
-                flip = 1
+                flip = -1
                 break
         else:
             raise ValueError("No column aligns with the top face direction [0, 0, ±1].")
 
         
         if top_face_col == 0:
+
             angle = pi/2 * flip
             rotY = np.array([[np.cos(angle),0,np.sin(angle)],
                              [0,1,0],
@@ -208,32 +209,18 @@ class FinalAssist:
             rotDetected = rotDetected @ rotY
 
         elif top_face_col == 1:
-            angle = pi/2 * flip
-            rotX = np.array([[np.cos(angle),-np.sin(angle),0],
-                             [np.sin(angle),1,0],
-                             [0,0,1]])
+            angle = pi/2 * -flip
+            rotX = np.array([[1,0,0],
+                             [0,np.cos(angle),-np.sin(angle)],
+                             [0,np.sin(angle),np.cos(angle)]])
             rotDetected = rotDetected @ rotX
 
-        elif flip == 1:
+        elif flip == -1:
             rotDetected = rotDetected @ np.array([[1,0,0],
                                                   [0,-1,0],
                                                   [0,0,-1]])
-        print(np.round(rotDetected,4))
+        #print(np.round(rotDetected,4))
 
-        """
-        # Construct a permutation matrix to swap columns
-        R_swap = np.eye(3)
-        R_swap[:, [2, top_face_col]] = R_swap[:, [top_face_col, 2]]  # Swap the third column with the top_face_col
-
-        # If the top face points to -z, flip the orientation
-        if flip:
-           R_swap = R_swap @ np.array([[1,0,0,],
-                                [0,-1,0,],
-                                [0,0,-1,]])
-
-        # Adjust the rotation matrix
-        R_corrected = np.dot(rotDetected, R_swap)
-        """
         # Construct the corrected pose
         pose_corrected = np.eye(4)
         pose_corrected[:3, :3] = rotDetected

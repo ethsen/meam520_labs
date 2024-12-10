@@ -1,64 +1,145 @@
 import numpy as np
-
-def reorient_top_face(pose):
-    """
-    Adjust a pose so that the "top face" of the cube points in the +z direction.
-    
-    Parameters:
-        pose (numpy.ndarray): A 4x4 homogeneous transformation matrix.
+from math import pi
+def adjustRotation(pose):
+        """
+        Adjusts the pose of the detected block in order
+        for the end-effector to easily grasp it. 
         
-    Returns:
-        numpy.ndarray: A 4x4 homogeneous transformation matrix with the top face aligned to +z.
-    """
-    # Extract rotation matrix and translation vector
-    R_detected = pose[:3, :3]
-    t_detected = pose[:3, 3]
+        INPUTS:
+        pose - 4x4 matrix of a pose 
 
-    # Check which column is [0, 0, 1] or [0, 0, -1]
-    for i in range(3):
-        col = R_detected[:, i]
-        if np.allclose(col, [0, 0, 1], atol=1e-6):
-            top_face_col = i
-            flip = False
-            break
-        elif np.allclose(col, [0, 0, -1], atol=1e-6):
-            top_face_col = i
-            flip = True
-            break
-    else:
-        raise ValueError("No column aligns with the top face direction [0, 0, ±1].")
+        OUPUTS:
+        adjPose - 4x4 matrix after adjusting pose 
+        """
+        rotDetected= pose[:3, :3]
+        #print(np.round(rotDetected,4))
+        tDetected = pose[:3, 3]
+        for i in range(3):
+            col = rotDetected[:, i]
+            if np.allclose(col, [0, 0, 1], atol=1e-3):
+                top_face_col = i
+                flip = 1
+                break
+            elif np.allclose(col, [0, 0, -1], atol=1e-3):
+                top_face_col = i
+                flip = -1
+                break
+        else:
+            raise ValueError("No column aligns with the top face direction [0, 0, ±1].")
 
-    # If the top face is already in the third column and correctly oriented, return the pose
-    if top_face_col == 2 and not flip:
+        
+        if top_face_col == 0:
+
+            angle = pi/2 * flip
+            rotY = np.array([[np.cos(angle),0,np.sin(angle)],
+                             [0,1,0],
+                             [-np.sin(angle),0,np.cos(angle)]])
+            rotDetected = rotDetected @ rotY
+
+        elif top_face_col == 1:
+            angle = pi/2 * -flip
+            rotX = np.array([[1,0,0],
+                             [0,np.cos(angle),-np.sin(angle)],
+                             [0,np.sin(angle),np.cos(angle)]])
+            rotDetected = rotDetected @ rotX
+
+        elif flip == -1:
+            rotDetected = rotDetected @ np.array([[1,0,0],
+                                                  [0,-1,0],
+                                                  [0,0,-1]])
+        #print(np.round(rotDetected,4))
+
+        # Construct the corrected pose
+        pose_corrected = np.eye(4)
+        pose_corrected[:3, :3] = rotDetected
+        pose_corrected[:3, 3] = tDetected  # Keep the translation unchanged
+        return pose_corrected
+def test_adjustRotation():
+    # Helper function to create a 4x4 pose matrix
+    def create_pose(rotation, translation):
+        pose = np.eye(4)
+        pose[:3, :3] = rotation
+        pose[:3, 3] = translation
         return pose
 
-    # Construct a permutation matrix to swap columns
-    R_swap = np.eye(3)
-    R_swap[:, [2, top_face_col]] = R_swap[:, [top_face_col, 2]]  # Swap the third column with the top_face_col
+    # Test cases
+    test_cases = [
+        {
+            "description": "Top face aligned with +Z",
+            "input": create_pose(np.array([[1, 0, 0],
+                                           [0, 1, 0],
+                                           [0, 0, 1]]), [0.1, 0.2, 0.3]),
+            "expected_rotation": np.array([[1, 0, 0],
+                                           [0, 1, 0],
+                                           [0, 0, 1]])
+        },
+        {
+            "description": "Top face aligned with -Z",
+            "input": create_pose(np.array([[1, 0, 0],
+                                           [0, -1, 0],
+                                           [0, 0, -1]]), [0.1, 0.2, 0.3]),
+            "expected_rotation": np.array([[1, 0, 0],
+                                           [0, 1, 0],
+                                           [0, 0, 1]])
+        },
+        {
+            "description": "Top face aligned with -X",
+            "input": create_pose(np.array([[0, 0, 1],
+                                           [0, 1, 0],
+                                           [-1, 0, 0]]), [0.1, 0.2, 0.3]),
+            "expected_rotation": np.array([[1, 0, 0],
+                                           [0, 1, 0],
+                                           [0, 0, 1]])
+        },
+        {
+            "description": "Top face aligned with +X",
+            "input": create_pose(np.array([[0, 0, 1],
+                                           [0, -1, 0],
+                                           [1, 0, 0]]), [0.1, 0.2, 0.3]),
+            "expected_rotation": np.array([[-1, 0, 0],
+                                           [0, -1, 0],
+                                           [0, 0, 1]])
+        },
+        {
+            "description": "Top face aligned with -Y",
+            "input": create_pose(np.array([[1, 0, 0],
+                                           [0, 0, 1],
+                                           [0, -1, 0]]), [0.1, 0.2, 0.3]),
+            "expected_rotation": np.array([[1, 0, 0],
+                                           [0, 1, 0],
+                                           [0, 0, 1]])
+        },
+        {
+            "description": "Top face aligned with +Y",
+            "input": create_pose(np.array([[1, 0, 0],
+                                           [0, 0, -1],
+                                           [0, 1, 0]]), [0.1, 0.2, 0.3]),
+            "expected_rotation": np.array([[1, 0, 0],
+                                           [0, 1, 0],
+                                           [0, 0, 1]])
+        },
+        
+        
+    ]
 
-    # If the top face points to -z, flip the orientation
-    if flip:
-        R_swap[:, 2] *= -1
+    # Run tests
+    for i, test in enumerate(test_cases):
+        print(f"Running Test {i+1}: {test['description']}")
+        adjusted_pose = adjustRotation(test["input"])
+        
+        # Extract the adjusted rotation matrix
+        adjusted_rotation = adjusted_pose[:3,:3]
+        
+        # Check if the rotation matches the expected rotation
+        if np.allclose(adjusted_rotation,
+                       test["expected_rotation"], atol=1e-3):
+            print(f"Test {i+1} PASSED!")
+        else:
+            print(f"Test {i+1} FAILED!")
+            print("Expected Rotation:")
+            print(test["expected_rotation"])
+            print("Adjusted Rotation:")
+            print(adjusted_rotation)
 
-    # Adjust the rotation matrix
-    R_corrected = np.dot(R_detected, R_swap)
-
-    # Construct the corrected pose
-    pose_corrected = np.eye(4)
-    pose_corrected[:3, :3] = R_corrected
-    pose_corrected[:3, 3] = t_detected  # Keep the translation unchanged
-
-    return pose_corrected
-
-# Example usage
-pose_detected = np.array([
-    [0, 1, 0, 1],  # Top face points to +z (already aligned)
-    [0, 0, 1, 2],
-    [1, 0, 0, 3],
-    [0, 0, 0, 1]
-])
-
-pose_corrected = reorient_top_face(pose_detected)
-
-print("Corrected Pose:")
-print(pose_corrected)
+# Run the test function
+test_adjustRotation()
