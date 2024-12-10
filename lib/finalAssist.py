@@ -10,22 +10,29 @@ class FinalAssist:
         self.fk =FK()
         self.arm = arm
         self.detector = detector
-        self.neutralPos = np.array([-pi/8,0,0,-pi/2,0,pi/2,pi/4])
-        self.dropOffPos = np.array([[1,0,0,0.56],
-                                    [0,-1,0,0.15],
-                                    [0,0,-1,0.24],
-                                    [0,0,0,1]])
-        self.neutralDropPos = np.array([[1,0,0,0.56],
-                                    [0,-1,0,0.15],
-                                    [0,0,-1,0.8],
-                                    [0,0,0,1]])
-        self.neutralDrop = np.array([0.15668, 0.07189, 0.11041,-1.53771, -0.00792, 1.60917, 1.05251])
+        
 
     def start(self):
         """
         Sets the arm in the neutral position
         """
         self.arm.safe_move_to_position(self.neutralPos)
+        if self.team == 'blue':
+            self.neutralPos = np.array([pi/8,0,0,-pi/2,0,pi/2,pi/4])
+            self.dropOffPos = np.array([[1,0,0,0.56],
+                                        [0,-1,0,-0.15],
+                                        [0,0,-1,0.24],
+                                        [0,0,0,1]])
+            self.neutralDrop = np.array([-0.15668, 0.07189, 0.11041,-1.53771, -0.00792, 1.60917, 1.05251])
+
+        else:
+            self.neutralPos = np.array([-pi/8,0,0,-pi/2,0,pi/2,pi/4])
+            self.dropOffPos = np.array([[1,0,0,0.56],
+                                        [0,-1,0,0.15],
+                                        [0,0,-1,0.24],
+                                        [0,0,0,1]])
+            self.neutralDrop = np.array([0.15668, 0.07189, 0.11041,-1.53771, -0.00792, 1.60917, 1.05251])
+            
 
     def detectBlocks(self):
         """

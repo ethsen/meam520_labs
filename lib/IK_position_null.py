@@ -4,14 +4,14 @@ from scipy.linalg import null_space
 from time import perf_counter
 
 
-from lib.calcJacobian import calcJacobian
-from lib.calculateFK import FK
-from lib.calcAngDiff import calcAngDiff
+#from lib.calcJacobian import calcJacobian
+#from lib.calculateFK import FK
+#from lib.calcAngDiff import calcAngDiff
 #from lib.IK_velocity import IK_velocity  #optional
 
-#from calcJacobian import calcJacobian
-#from calculateFK import FK
-#from calcAngDiff import calcAngDiff
+from calcJacobian import calcJacobian
+from calculateFK import FK
+from calcAngDiff import calcAngDiff
 #from IK_velocity import IK_velocity
 
 class IK:
@@ -311,7 +311,7 @@ class IK:
     def singleTest():
         seed = np.array([0,0,0,-pi/2,0,pi/2,pi/4])
         target = np.array([[1,0,0,0.56],
-                            [0,-1,0,0.15],
+                            [0,-1,0,-0.15],
                             [0,0,-1,0.5],
                             [0,0,0,1]])
         q, rollout, success, message = ik.inverse(target, seed, 'J_pseudo', 0.3)  #try both methods
