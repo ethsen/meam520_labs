@@ -43,7 +43,7 @@ class FinalAssist:
         for id in blockPoses:
             pose = blockPoses[id]
             self.pickUp(id,pose)
-            self.dropOff()
+            self.dropOff(id)
     
     def detectBlocks(self, iters):
         """
@@ -154,19 +154,42 @@ class FinalAssist:
 
         return pose[id], aboveBlock
 
-    def dropOff(self):
+    def dropOff(self, id):
         """
         Drop off function. The arm first places itself above
         the drop off point and then lowers the block to its
         final position.
+
+        INPUTS:
+        id - block id
         """
         drop = self.ik.inverse(self.dropOffPos,self.neutralDrop, 'J_pseudo', 0.3)[0]
         self.arm.safe_move_to_position(self.neutralDrop)
         self.arm.safe_move_to_position(drop)
         self.arm.open_gripper()
         self.arm.safe_move_to_position(self.neutralDrop)
+        print(self.checkDrop(id))
         self.dropOffPos[2,3] += 0.05
         self.arm.safe_move_to_position(self.neutralPos)
+
+    def checkDrop(self, id):
+        """
+        Checks whether successful drop has been made
+
+        INPUTS:
+        id - block id
+
+        OUTPUTS:
+        success - boolean whether a successful drop was
+        made
+        """
+        blocksDetected = self.detectBlocks(1)
+
+        if id in blocksDetected:
+            return True
+        else:
+            return False
+
 
     def adjustRotation(self,pose, cameraToWorld):
         """
@@ -219,16 +242,21 @@ class FinalAssist:
         pose_corrected = np.eye(4)
         pose_corrected[:3, :3] = rotDetected
         pose_corrected[:3, 3] = tDetected
-
+        print(top_face_col)
+        print(flip)
+        print("fucked:", np.round(rotDetected,4))
         success = self.ik.inverse(cameraToWorld @ pose_corrected, self.neutralPos, 'J_pseudo', 0.3)[2]
+        print(success)
         while not success:
-            #print("Init:", np.round(rotDetected,4))
+            print("Init:", np.round(rotDetected,4))
             rotDetected = rotDetected @ np.array([[0,-1,0],
                                                 [1,0,0],
                                                 [0,0,1]])
-            #print("Fixed:", np.round(rotDetected,4))
+            print("Fixed:", np.round(rotDetected,4))
             pose_corrected[:3, :3] = rotDetected
             success = self.ik.inverse(cameraToWorld @pose_corrected, self.neutralPos, 'J_pseudo', 0.3)[2]
+            print(success)
+
             
         return pose_corrected
         #print(top_face_col)
