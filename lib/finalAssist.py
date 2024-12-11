@@ -207,21 +207,15 @@ class FinalAssist:
         pose_corrected[:3, 3] = tDetected
 
         success = self.ik.inverse(cameraToWorld @ pose_corrected, self.neutralPos, 'J_pseudo', 0.3)[2]
-        print(success)
         while not success:
-            print("fucked it")
-            print(top_face_col)
-            print(flip)
-            print("Init:", np.round(rotDetected,4))
+            #print("Init:", np.round(rotDetected,4))
             rotDetected = rotDetected @ np.array([[0,-1,0],
                                                 [1,0,0],
                                                 [0,0,1]])
-            print("Fixed:", np.round(rotDetected,4))
-
+            #print("Fixed:", np.round(rotDetected,4))
             pose_corrected[:3, :3] = rotDetected
             success = self.ik.inverse(cameraToWorld @pose_corrected, self.neutralPos, 'J_pseudo', 0.3)[2]
-            print(success)
-
+            
         return pose_corrected
         #print(top_face_col)
         #print(flip)
