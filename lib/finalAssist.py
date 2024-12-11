@@ -95,10 +95,10 @@ class FinalAssist:
 
         if success:
             print(message)
-            return jointConfig
+            return jointConfig, success
         else:
             print(message)
-            return self.neutralPos
+            return self.neutralPos, success
 
     def pickUp(self,id, blockPose):
         """
@@ -244,9 +244,9 @@ class FinalAssist:
         print(top_face_col)
         print(flip)
         print("fucked:", np.round(rotDetected,4))
-        q,_,success,message = self.ik.inverse(cameraToWorld @ pose_corrected, self.neutralPos, 'J_pseudo', 0.3)
+        #q,_,success,message = self.ik.inverse(cameraToWorld @ pose_corrected, self.neutralDrop, 'J_pseudo', 0.3)
+        _, success = self.getJointConfig(cameraToWorld @ pose_corrected,self.neutralDrop )
         print(success)
-        print(message)
         while not success:
             print("Init:", np.round(rotDetected,4))
             rotDetected = rotDetected @ np.array([[0,-1,0],
@@ -254,7 +254,8 @@ class FinalAssist:
                                                 [0,0,1]])
             print("Fixed:", np.round(rotDetected,4))
             pose_corrected[:3, :3] = rotDetected
-            success = self.ik.inverse(cameraToWorld @pose_corrected, self.neutralPos, 'J_pseudo', 0.3)[2]
+            #success = self.ik.inverse(cameraToWorld @pose_corrected, self.neutralPos, 'J_pseudo', 0.3)[2]
+            _, success = self.getJointConfig(cameraToWorld @ pose_corrected,self.neutralDrop )
             print(success)
 
             
