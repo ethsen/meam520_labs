@@ -25,7 +25,7 @@ class FinalAssist:
             self.neutralDrop = np.array([-0.1286, 0.07215, -0.13995, -1.53771, 0.01006, 1.60915, 0.51682])
 
         else:
-            self.neutralPos = np.array([-pi/11,0,0,-pi/2,0,pi/2,pi/4])
+            self.neutralPos = np.array([-pi/4,0,0,-pi/2,0,pi/2,pi/4])
             self.dropOffPos = np.array([[1,0,0,0.56],
                                         [0,-1,0,0.15],
                                         [0,0,-1,0.24],
