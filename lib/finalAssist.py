@@ -10,7 +10,7 @@ class FinalAssist:
         self.fk =FK()
         self.arm = arm
         self.detector = detector
-        
+
 
     def start(self):
         """
@@ -31,12 +31,12 @@ class FinalAssist:
                                         [0,0,-1,0.24],
                                         [0,0,0,1]])
             self.neutralDrop = np.array([0.15668, 0.07189, 0.11041,-1.53771, -0.00792, 1.60917, 1.05251])
-            
+
         self.arm.safe_move_to_position(self.neutralPos)
 
     def detectBlocks(self):
         """
-        Block detection in order to find and transform 
+        Block detection in order to find and transform
         block's position into world frame.
 
         INPUTS:
@@ -55,7 +55,7 @@ class FinalAssist:
         for _ in range(1):
             blocks = self.detector.get_detections()
             for id, pose in blocks:
-                pose = self.adjustRotation(pose)
+                pose = self.adjustRotation(pose, cameraToWorld)
                 world_pose = cameraToWorld @ pose
                 if id not in blockDict:
                     blockDict[id] = np.zeros_like(world_pose)  # Initialize to a zero array
@@ -63,24 +63,23 @@ class FinalAssist:
 
         # Compute the average pose for each block
         poses = [blockDict[id] / 1 for id in blockDict]
-
         return poses
-    
+
     def getJointConfig(self,transformation, guess = np.array([-pi/8,0,0,-pi/2,0,pi/2,pi/4])):
         """
         Uses IK class to find and return the joint configuration
         for block pose
 
         INPUTS:
-        transformation - 4x4 transformation matrix of a desired 
+        transformation - 4x4 transformation matrix of a desired
         position in the world frame
         guess - best guess for inverse solver to use
 
         OUTPUTS:
         jointConfig - 1x7 array of the joint configurations
         """
-        
-        
+
+
         jointConfig,_,success,message = self.ik.inverse(transformation,guess, 'J_pseudo', 0.3)
 
         if success:
@@ -105,7 +104,7 @@ class FinalAssist:
         self.arm.open_gripper()
 
         blockPose, bestGuess = self.approach(blockPose)
-        
+
         jointConfig = self.getJointConfig(blockPose, bestGuess)
         bestGuess[4:] = jointConfig[4:]
         self.arm.safe_move_to_position(bestGuess)
@@ -116,7 +115,7 @@ class FinalAssist:
 
     def approach(self, blockPose):
         """
-        Approach a blcok and rescan the fov to get 
+        Approach a blcok and rescan the fov to get
         clearer AprilTag detection
 
         INPUTS:
@@ -127,7 +126,7 @@ class FinalAssist:
         OUPUTS:
         orientation - 3x3 array of rotation matrix
         with respect to world frame
-        jointConfig - 1x7 array of joint configuration 
+        jointConfig - 1x7 array of joint configuration
         right above the block
         """
         print("Approaching Block...")
@@ -139,9 +138,9 @@ class FinalAssist:
         aboveBlock = self.getJointConfig(blockPose)
         self.arm.safe_move_to_position(aboveBlock)
         pose = self.detectBlocks()[0]
-        
+
         return pose, aboveBlock
-    
+
     def dropOff(self):
         """
         Drop off function. The arm first places itself above
@@ -155,16 +154,16 @@ class FinalAssist:
         self.arm.safe_move_to_position(self.neutralDrop)
         self.dropOffPos[2,3] += 0.05
 
-    def adjustRotation(self,pose):
+    def adjustRotation(self,pose, cameraToWorld):
         """
         Adjusts the pose of the detected block in order
-        for the end-effector to correctly grasp each block. 
-        
+        for the end-effector to correctly grasp each block.
+
         INPUTS:
-        pose - 4x4 matrix of a pose 
+        pose - 4x4 matrix of a pose
 
         OUPUTS:
-        adjPose - 4x4 matrix after adjusting pose 
+        adjPose - 4x4 matrix after adjusting pose
         """
         print("Adjusting Rotation")
         rotDetected= pose[:3, :3]
@@ -202,13 +201,14 @@ class FinalAssist:
             rotDetected = rotDetected @ np.array([[1,0,0],
                                                   [0,-1,0],
                                                   [0,0,-1]])
-            
+
         pose_corrected = np.eye(4)
         pose_corrected[:3, :3] = rotDetected
-        pose_corrected[:3, 3] = tDetected 
+        pose_corrected[:3, 3] = tDetected
 
-
-        while not self.ik.inverse(pose_corrected, self.neutralPos, 'J_pseudo', 0.3)[2]:
+        success = self.ik.inverse(cameraToWorld @ pose_corrected, self.neutralPos, 'J_pseudo', 0.3)[2]
+        print(success)
+        while not success:
             print("fucked it")
             print(top_face_col)
             print(flip)
@@ -219,12 +219,10 @@ class FinalAssist:
             print("Fixed:", np.round(rotDetected,4))
 
             pose_corrected[:3, :3] = rotDetected
-                
+            success = self.ik.inverse(cameraToWorld @pose_corrected, self.neutralPos, 'J_pseudo', 0.3)[2]
+            print(success)
+
         return pose_corrected
         #print(top_face_col)
         #print(flip)
         #print("FInal:", np.round(rotDetected,4))
-        
-    
-            
-            
