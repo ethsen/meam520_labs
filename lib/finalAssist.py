@@ -210,7 +210,6 @@ class FinalAssist:
         OUPUTS:
         adjPose - 4x4 matrix after adjusting pose
         """
-        print("Adjusting Rotation")
         rotDetected= pose[:3, :3]
         tDetected = pose[:3, 3]
         for i in range(3):
