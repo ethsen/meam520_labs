@@ -215,7 +215,7 @@ class FinalAssist:
                 flip = -1
                 break
         else:
-            raise ValueError("No column aligns with the top face direction [0, 0, ±1].")
+            raise ValueError("No column aligns with the top face directon [0, 0, ±1].")
 
         if top_face_col == 0:
             angle = pi/2 * flip
@@ -245,7 +245,7 @@ class FinalAssist:
         print(flip)
         print("fucked:", np.round(rotDetected,4))
         #q,_,success,message = self.ik.inverse(cameraToWorld @ pose_corrected, self.neutralDrop, 'J_pseudo', 0.3)
-        _, success = self.getJointConfig(cameraToWorld @ pose_corrected,self.neutralDrop )
+        _, success = self.getJointConfig(cameraToWorld @ pose_corrected,self.neutralDrop)
         print(success)
         while not success:
             print("Init:", np.round(rotDetected,4))
@@ -255,7 +255,7 @@ class FinalAssist:
             print("Fixed:", np.round(rotDetected,4))
             pose_corrected[:3, :3] = rotDetected
             #success = self.ik.inverse(cameraToWorld @pose_corrected, self.neutralPos, 'J_pseudo', 0.3)[2]
-            _, success = self.getJointConfig(cameraToWorld @ pose_corrected,self.neutralDrop )
+            _, success = self.getJointConfig(cameraToWorld @ pose_corrected,self.neutralDrop)
             print(success)
 
             
