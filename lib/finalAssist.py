@@ -40,7 +40,8 @@ class FinalAssist:
         """
 
         blockPoses = self.detectBlocks(1)
-        for id, pose in blockPoses:
+        for id in blockPoses:
+            pose = blockPoses[id]
             self.pickUp(id,pose)
             self.dropOff()
     
