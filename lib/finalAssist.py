@@ -16,7 +16,7 @@ class FinalAssist:
         Sets the arm in the neutral position
         """
         if self.team == 'blue':
-            self.neutralPos = np.array([pi/10,0,0,-pi/2,0,pi/2,pi/4])
+            self.neutralPos = np.array([pi/11,0,0,-pi/2,0,pi/2,pi/4])
             self.dropOffPos = np.array([[1,0,0,0.56],
                                         [0,-1,0,-0.15],
                                         [0,0,-1,0.24],
@@ -24,7 +24,7 @@ class FinalAssist:
             self.neutralDrop = np.array([-0.1286, 0.07215, -0.13995, -1.53771, 0.01006, 1.60915, 0.51682])
 
         else:
-            self.neutralPos = np.array([-pi/10,0,0,-pi/2,0,pi/2,pi/4])
+            self.neutralPos = np.array([-pi/11,0,0,-pi/2,0,pi/2,pi/4])
             self.dropOffPos = np.array([[1,0,0,0.56],
                                         [0,-1,0,0.15],
                                         [0,0,-1,0.24],
@@ -39,11 +39,14 @@ class FinalAssist:
         Start function for static block pick ups
         """
 
-        blockPoses = self.detectBlocks(1)
+        blockPoses = self.detectBlocks(100)
         for id in blockPoses:
             pose = blockPoses[id]
             self.pickUp(id,pose)
             self.dropOff(id)
+    
+        if self.failedDrop:
+            self.goStatic()
     
     def detectBlocks(self, iters):
         """
@@ -116,6 +119,7 @@ class FinalAssist:
         self.arm.open_gripper()
 
         blockPose, bestGuess = self.approach(id,blockPose)
+        blockPose[2,3] += 0.02
 
         jointConfig,_ = self.getJointConfig(blockPose, bestGuess)
         bestGuess[4:] = jointConfig[4:]
@@ -145,12 +149,12 @@ class FinalAssist:
         print("Approaching Block...")
         blockPose = np.array([[1,0,0,blockPose[0,3]-0.025],
                                 [0,-1,0,blockPose[1,3]],
-                                [0,0,-1,blockPose[2,3]+0.075],
+                                [0,0,-1,blockPose[2,3]+0.1],
                                 [0,0,0,1]])
 
         aboveBlock,_ = self.getJointConfig(blockPose)
         self.arm.safe_move_to_position(aboveBlock)
-        pose = self.detectBlocks(1)
+        pose = self.detectBlocks(100)
 
         return pose[id], aboveBlock
 
@@ -168,8 +172,13 @@ class FinalAssist:
         self.arm.safe_move_to_position(drop)
         self.arm.open_gripper()
         self.arm.safe_move_to_position(self.neutralDrop)
-        print(self.checkDrop(id))
-        self.dropOffPos[2,3] += 0.05
+        successfulDrop = self.checkDrop(id)
+        if successfulDrop:
+            print("Drop Successful")
+            self.dropOffPos[2,3] += 0.05
+        else:
+            self.failedDrop = True
+            print("Drop Unsuccessful")
         self.arm.safe_move_to_position(self.neutralPos)
 
     def checkDrop(self, id):
@@ -183,7 +192,7 @@ class FinalAssist:
         success - boolean whether a successful drop was
         made
         """
-        blocksDetected = self.detectBlocks(1)
+        blocksDetected = self.detectBlocks(100)
 
         if id in blocksDetected:
             return True
@@ -241,22 +250,20 @@ class FinalAssist:
         pose_corrected = np.eye(4)
         pose_corrected[:3, :3] = rotDetected
         pose_corrected[:3, 3] = tDetected
-        print(top_face_col)
-        print(flip)
-        print("fucked:", np.round(rotDetected,4))
-        #q,_,success,message = self.ik.inverse(cameraToWorld @ pose_corrected, self.neutralDrop, 'J_pseudo', 0.3)
+        #print(top_face_col)
+        #print(flip)
+        #print("hmm:", np.round(rotDetected,4))
         _, success = self.getJointConfig(cameraToWorld @ pose_corrected,self.neutralDrop)
-        print(success)
+        #print(success)
         while not success:
-            print("Init:", np.round(rotDetected,4))
+            #print("Init:", np.round(rotDetected,4))
             rotDetected = rotDetected @ np.array([[0,-1,0],
                                                 [1,0,0],
                                                 [0,0,1]])
-            print("Fixed:", np.round(rotDetected,4))
+            #print("Fixed:", np.round(rotDetected,4))
             pose_corrected[:3, :3] = rotDetected
-            #success = self.ik.inverse(cameraToWorld @pose_corrected, self.neutralPos, 'J_pseudo', 0.3)[2]
             _, success = self.getJointConfig(cameraToWorld @ pose_corrected,self.neutralDrop)
-            print(success)
+            #print(success)
 
             
         return pose_corrected
