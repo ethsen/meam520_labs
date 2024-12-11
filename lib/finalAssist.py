@@ -10,6 +10,7 @@ class FinalAssist:
         self.fk =FK()
         self.arm = arm
         self.detector = detector
+        self.iters = 1
 
     def start(self):
         """
@@ -39,7 +40,7 @@ class FinalAssist:
         Start function for static block pick ups
         """
 
-        blockPoses = self.detectBlocks(100)
+        blockPoses = self.detectBlocks()
         for id in blockPoses:
             pose = blockPoses[id]
             self.pickUp(id,pose)
@@ -48,13 +49,10 @@ class FinalAssist:
         if self.failedDrop:
             self.goStatic()
     
-    def detectBlocks(self, iters):
+    def detectBlocks(self):
         """
         Block detection in order to find and transform
         block's position into world frame.
-
-        INPUTS:
-        iters - amount of scans desired
 
         OUTPUTS:
         poses - Array of poses for each block in world frame
@@ -65,7 +63,7 @@ class FinalAssist:
 
         cameraToWorld = currT0e @ self.detector.get_H_ee_camera()
         #print("Cam2World: ",np.round(cameraToWorld))
-        for _ in range(iters):
+        for _ in range(self.iters):
             blocks = self.detector.get_detections()
             for id, pose in blocks:
                 pose = self.adjustRotation(pose, cameraToWorld)
@@ -75,7 +73,7 @@ class FinalAssist:
                 blockDict[id] += world_pose
 
         for id in blockDict:
-            blockDict[id] /= iters
+            blockDict[id] /= self.iters
         
         return blockDict
 
@@ -154,7 +152,7 @@ class FinalAssist:
 
         aboveBlock,_ = self.getJointConfig(blockPose)
         self.arm.safe_move_to_position(aboveBlock)
-        pose = self.detectBlocks(100)
+        pose = self.detectBlocks()
 
         return pose[id], aboveBlock
 
@@ -192,7 +190,7 @@ class FinalAssist:
         success - boolean whether a successful drop was
         made
         """
-        blocksDetected = self.detectBlocks(100)
+        blocksDetected = self.detectBlocks()
 
         if id in blocksDetected:
             return True
