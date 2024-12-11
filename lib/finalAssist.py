@@ -190,7 +190,6 @@ class FinalAssist:
         else:
             return False
 
-
     def adjustRotation(self,pose, cameraToWorld):
         """
         Adjusts the pose of the detected block in order
@@ -245,8 +244,9 @@ class FinalAssist:
         print(top_face_col)
         print(flip)
         print("fucked:", np.round(rotDetected,4))
-        success = self.ik.inverse(cameraToWorld @ pose_corrected, self.neutralPos, 'J_pseudo', 0.3)[2]
+        q,_,success,message = self.ik.inverse(cameraToWorld @ pose_corrected, self.neutralPos, 'J_pseudo', 0.3)
         print(success)
+        print(message)
         while not success:
             print("Init:", np.round(rotDetected,4))
             rotDetected = rotDetected @ np.array([[0,-1,0],
