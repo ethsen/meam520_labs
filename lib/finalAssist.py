@@ -150,7 +150,7 @@ class FinalAssist:
 
         aboveBlock = self.getJointConfig(blockPose)
         self.arm.safe_move_to_position(aboveBlock)
-        pose = self.detectBlocks()
+        pose = self.detectBlocks(1)
 
         return pose[id], aboveBlock
 
