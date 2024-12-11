@@ -16,8 +16,8 @@ if __name__ == "__main__":
     rospy.init_node("team_script")
     arm_controller = ArmController()
     object_detector = ObjectDetector()
-    initial_arm_position = np.array([0, 0, 0, -3.1415 / 2, 0, 3.1415 / 2, 3.1415 / 4])
-    arm_controller.safe_move_to_position(initial_arm_position)  # On your mark!
+    start_position = np.array([-0.01779206, -0.76012354,  0.01978261, -2.34205014, 0.02984053, 1.54119353+pi/2, 0.75344866])
+    arm_controller.safe_move_to_position(start_position) # on your mark! 
 
     print("\n****************")
     if team == 'blue':
@@ -30,10 +30,7 @@ if __name__ == "__main__":
 
     fa = FinalAssist(arm_controller,object_detector, team)
     fa.start()
-    blockPoses = fa.detectBlocks()
-    for pose in blockPoses:
-        fa.pickUp(pose)
-        fa.dropOff()
+
 
 
    

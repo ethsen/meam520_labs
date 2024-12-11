@@ -11,7 +11,6 @@ class FinalAssist:
         self.arm = arm
         self.detector = detector
 
-
     def start(self):
         """
         Sets the arm in the neutral position
@@ -33,15 +32,25 @@ class FinalAssist:
             self.neutralDrop = np.array([0.15668, 0.07189, 0.11041,-1.53771, -0.00792, 1.60917, 1.05251])
 
         self.arm.safe_move_to_position(self.neutralPos)
+        self.goStatic()
 
-    def detectBlocks(self):
+    def goStatic(self):
+        """
+        Start function for static block pick ups
+        """
+
+        blockPoses = self.detectBlocks(1)
+        for id, pose in blockPoses:
+            self.pickUp(id,pose)
+            self.dropOff()
+    
+    def detectBlocks(self, iters):
         """
         Block detection in order to find and transform
         block's position into world frame.
 
         INPUTS:
-        arm - Arm controller object
-        detector - Detector object
+        iters - amount of scans desired
 
         OUTPUTS:
         poses - Array of poses for each block in world frame
@@ -52,7 +61,7 @@ class FinalAssist:
 
         cameraToWorld = currT0e @ self.detector.get_H_ee_camera()
         #print("Cam2World: ",np.round(cameraToWorld))
-        for _ in range(1):
+        for _ in range(iters):
             blocks = self.detector.get_detections()
             for id, pose in blocks:
                 pose = self.adjustRotation(pose, cameraToWorld)
@@ -61,9 +70,10 @@ class FinalAssist:
                     blockDict[id] = np.zeros_like(world_pose)  # Initialize to a zero array
                 blockDict[id] += world_pose
 
-        # Compute the average pose for each block
-        poses = [blockDict[id] / 1 for id in blockDict]
-        return poses
+        for id in blockDict:
+            blockDict[id] /= iters
+        
+        return blockDict
 
     def getJointConfig(self,transformation, guess = np.array([-pi/8,0,0,-pi/2,0,pi/2,pi/4])):
         """
@@ -89,13 +99,14 @@ class FinalAssist:
             print(message)
             return self.neutralPos
 
-    def pickUp(self, blockPose):
+    def pickUp(self,id, blockPose):
         """
         Pickup function for static blocks. The arm
         positions itself above the block and then lowers down
         to pick it up.
 
         INPUTS:
+        id -  Block id to ensure correct block picked up
         blockPose - 4x4 pose of block in world frame
 
         OUTPUTS:
@@ -103,7 +114,7 @@ class FinalAssist:
         """
         self.arm.open_gripper()
 
-        blockPose, bestGuess = self.approach(blockPose)
+        blockPose, bestGuess = self.approach(id,blockPose)
 
         jointConfig = self.getJointConfig(blockPose, bestGuess)
         bestGuess[4:] = jointConfig[4:]
@@ -113,12 +124,13 @@ class FinalAssist:
         self.arm.exec_gripper_cmd(0.03,60)
         self.arm.safe_move_to_position(bestGuess)
 
-    def approach(self, blockPose):
+    def approach(self,id, blockPose):
         """
         Approach a blcok and rescan the fov to get
         clearer AprilTag detection
 
         INPUTS:
+        id -  Block id to ensure correct block picked up
         arm - Arm object
         blockPose - Pose of position right above
         block in world frame
@@ -137,9 +149,9 @@ class FinalAssist:
 
         aboveBlock = self.getJointConfig(blockPose)
         self.arm.safe_move_to_position(aboveBlock)
-        pose = self.detectBlocks()[0]
+        pose = self.detectBlocks()
 
-        return pose, aboveBlock
+        return pose[id], aboveBlock
 
     def dropOff(self):
         """
@@ -153,6 +165,7 @@ class FinalAssist:
         self.arm.open_gripper()
         self.arm.safe_move_to_position(self.neutralDrop)
         self.dropOffPos[2,3] += 0.05
+        self.arm.safe_move_to_position(self.neutralPos)
 
     def adjustRotation(self,pose, cameraToWorld):
         """
