@@ -117,7 +117,7 @@ class FinalAssist:
 
         blockPose, bestGuess = self.approach(id,blockPose)
 
-        jointConfig = self.getJointConfig(blockPose, bestGuess)
+        jointConfig,_ = self.getJointConfig(blockPose, bestGuess)
         bestGuess[4:] = jointConfig[4:]
         self.arm.safe_move_to_position(bestGuess)
         print("Picking up block...")
@@ -148,7 +148,7 @@ class FinalAssist:
                                 [0,0,-1,blockPose[2,3]+0.075],
                                 [0,0,0,1]])
 
-        aboveBlock = self.getJointConfig(blockPose)
+        aboveBlock,_ = self.getJointConfig(blockPose)
         self.arm.safe_move_to_position(aboveBlock)
         pose = self.detectBlocks(1)
 
